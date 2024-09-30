@@ -2,6 +2,7 @@ package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.request.ReviewCreationRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
+import com.example.FashionShop.Dto.response.PageableResponse;
 import com.example.FashionShop.Services.ReviewService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
     ReviewService reviewService;
 
-    @PostMapping("/create-review")
+    @PostMapping("/create")
     public ApiResponse createReview(@RequestBody ReviewCreationRequest request)
     {
         return reviewService.createReview(request);
@@ -28,9 +29,13 @@ public class ReviewController {
     }
 
     @GetMapping("/get-review-by-idproduct/{idProduct}")
-    public ApiResponse getReviewByIdProduct(@PathVariable("idProduct") String idProduct)
+    public PageableResponse getReviewByIdProduct(
+            @PathVariable("idProduct") String idProduct,
+            @RequestParam int page,
+            @RequestParam int size
+    )
     {
-        return reviewService.getReviewByIdProduct(idProduct);
+        return reviewService.getReviewByIdProduct(idProduct, page, size);
     }
 
     @GetMapping("/get-review-by-iduser/{idUser}")

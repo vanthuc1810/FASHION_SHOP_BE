@@ -2,6 +2,7 @@ package com.example.FashionShop.Services;
 
 import com.example.FashionShop.Dto.request.ReviewCreationRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
+import com.example.FashionShop.Dto.response.PageableResponse;
 import com.example.FashionShop.Dto.response.ReviewResponse;
 import com.example.FashionShop.Entity.Product;
 import com.example.FashionShop.Entity.Review;
@@ -18,6 +19,10 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.flogger.Flogger;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -89,11 +94,13 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public ApiResponse<List<ReviewResponse>> getReviewByIdProduct(String idProduct)
+    public PageableResponse getReviewByIdProduct(String idProduct, int page, int size)
     {
-        List<Review> listReviews = reviewRepository.findAllByIdProduct(idProduct);
+        Pageable pageable = PageRequest.of(page,size);
+
+        Page<Review> listReviews = reviewRepository.findAllByIdProduct(idProduct, pageable);
         List<ReviewResponse> listReviewResponse = new ArrayList<>();
-        for (Review review : listReviews)
+        for (Review review : listReviews.getContent())
         {
             ReviewResponse response = new ReviewResponse()
                     .builder()
@@ -107,9 +114,15 @@ public class ReviewService implements IReviewService {
             listReviewResponse.add(response);
         }
 
-        return ApiResponse.<List<ReviewResponse>>builder()
+        PageableResponse pageableResponse = new PageableResponse()
+                .builder()
+                .totalElements(listReviews.getTotalElements())
+                .totalPages(listReviews.getTotalPages())
                 .results(listReviewResponse)
+                .number(listReviews.getNumber())
+                .size(listReviews.getSize())
                 .build();
+        return pageableResponse;
     }
 
     @Override

@@ -19,6 +19,7 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String idReview;
+    @Column(length = 600)
     String comment;
     int star;
     LocalDate postedTime;

@@ -36,42 +36,30 @@ public class UserService implements IUserSerive {
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse getUsers() {
         List<User> users = userRepository.findAll();
-        return new ApiResponse<>()
-                .builder()
-                .results(users)
-                .build();
+        return new ApiResponse<>().builder().results(users).build();
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse getUserById(String idUser)
-    {
+    public ApiResponse getUserById(String idUser) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
-        return new ApiResponse()
-                .builder()
-                .results(user)
-                .build();
+        return new ApiResponse().builder().results(user).build();
     }
+
     @Override
     @PostAuthorize("returnObject.results.idUser == authentication.name")
-    public ApiResponse getInfor()
-    {
+    public ApiResponse getInfor() {
         var context = SecurityContextHolder.getContext();
         String idUser = context.getAuthentication().getName();
         User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
         UserResponse userResponse = userMapper.toUserResponse(user);
-        return new ApiResponse()
-                .builder()
-                .results(userResponse)
-                .build();
+        return new ApiResponse().builder().results(userResponse).build();
     }
 
     @Override
-    public ApiResponse createUser(UserCreationRequest request){
+    public ApiResponse createUser(UserCreationRequest request) {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        if(userRepository.existsByUserName(request.getUserName()))
-        {
+        if (userRepository.existsByUserName(request.getUserName())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         userRepository.save(user);
@@ -80,7 +68,7 @@ public class UserService implements IUserSerive {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse updateUser(String idUser, UpdateUserRequest request){
+    public ApiResponse updateUser(String idUser, UpdateUserRequest request) {
         User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
         user = userMapper.updateUser(user, request);
         userRepository.save(user);

@@ -12,10 +12,5 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShippingAddressUpdateRequest {
     String address;
-    String city;
-    String state;
-    String zipcode;
-    String country;
     boolean defaultAddress;
-
 }

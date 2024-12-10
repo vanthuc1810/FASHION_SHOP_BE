@@ -14,4 +14,8 @@ public class UserResponse {
     String email;
     String phone;
     String address;
+    String userName;
+    String password;
+    float wallet;
+
 }

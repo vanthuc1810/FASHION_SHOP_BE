@@ -1,15 +1,17 @@
 package com.example.FashionShop.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Data
@@ -19,26 +21,24 @@ import java.util.Set;
 @Builder
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String idProduct;
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer idProduct;
 
     String description;
 
-    @ManyToOne
-    @JoinColumn(name = "id_manufacturer")
-    ManuFacturer manufacturer;
+    String manufacturer;
 
     String name;
     String images;
     int discount;
     double price;
+
     @Builder.Default
     boolean deleted = false;
+
     String unitStock;
 
     @ManyToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     @JoinColumn(name = "id_category")
     Category category;
@@ -51,17 +51,10 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<CardItem> cardItems = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "color_products",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "color_id"))
-    List<Color> colors;
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ColorProduct> colorProducts ;
 
-    @ManyToMany
-    @JoinTable(
-            name = "size_products",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "size_id"))
-    List<Size> sizes;
+
+    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL, orphanRemoval = true)
+    List<SizeProduct> sizeProducts;
 }

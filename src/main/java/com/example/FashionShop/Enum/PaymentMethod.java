@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 public enum PaymentMethod {
     WALLET("Wallet"),
     BANK_TRANSFER("Bank Transfer"),
-    CASH("Cash")
-    ;
+    CASH("Cash");
     String name;
 }

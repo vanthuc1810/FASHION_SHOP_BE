@@ -1,10 +1,7 @@
 package com.example.FashionShop.Dto.response;
 
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Data
 @NoArgsConstructor

@@ -1,5 +1,15 @@
 package com.example.FashionShop.Services;
 
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.example.FashionShop.Dto.request.AuthenticationRequest;
 import com.example.FashionShop.Dto.request.IntrospectRequest;
 import com.example.FashionShop.Dto.response.AuthenticationResponse;
@@ -14,19 +24,11 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -39,17 +41,19 @@ public class AuthenticationService implements IAuthenticationService {
     protected String SIGNER_KEY;
 
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest request){
-        var user = userRepository.findByUserName(request.getUserName()).orElseThrow(()
-                -> new AppException(ErrorCode.USER_NOTFOUND));
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        var user = userRepository
+                .findByUserName(request.getUserName())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(10);
-        boolean authenticated = bCryptPasswordEncoder.matches(request.getPassword(),user.getPassword());
-        if(!authenticated){
+        boolean authenticated = bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword());
+        if (!authenticated) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         var token = genToken(request.getUserName());
-        AuthenticationResponse authenticationRespone = new AuthenticationResponse().builder()
+        AuthenticationResponse authenticationRespone = new AuthenticationResponse()
+                .builder()
                 .token(token)
                 .authenticated(authenticated)
                 .build();
@@ -57,11 +61,11 @@ public class AuthenticationService implements IAuthenticationService {
     }
 
     @Override
-    public String genToken(String username){
-        Optional<User> user =  userRepository.findByUserName(username);
+    public String genToken(String username) {
+        Optional<User> user = userRepository.findByUserName(username);
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.get().getIdUser())
+                .subject(user.get().getIdUser().toString())
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
                 .claim("scope", user.get().getRole())
@@ -69,8 +73,7 @@ public class AuthenticationService implements IAuthenticationService {
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
 
-
-//        Ky token(Thuat toan ky, )
+        //        Ky token(Thuat toan ky, )
 
         try {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
@@ -79,6 +82,7 @@ public class AuthenticationService implements IAuthenticationService {
             throw new RuntimeException(e);
         }
     }
+
     @Override
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();

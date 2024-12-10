@@ -1,6 +1,7 @@
 package com.example.FashionShop.Configuration;
 
-import lombok.experimental.NonFinal;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import javax.crypto.spec.SecretKeySpec;
+import lombok.experimental.NonFinal;
 
 @Configuration
 @EnableWebSecurity
@@ -27,43 +28,47 @@ import javax.crypto.spec.SecretKeySpec;
 public class SecurityConfig {
     @NonFinal
     @Value("${jwt.secret}")
-    protected String SERCRET_KEY;
+    protected String secretKey;
 
-    private final  String[] PUBLIC_ENDPOINT = {
-            "/auth/login",
-            "/product/*",
-            "/review",
-            "/review/**",
-            "/product",
-            "/user/create",
-            "/user/getUser/*",
-            "/color",
-            "/size",
-            "/category"
+    private final String[] publicEnpoints = {
+        "/auth/login",
+        "/product/*",
+        "/review",
+        "/review/**",
+        "/product",
+        "/user/getUser/*",
+        "/user/create",
+        "/color",
+        "/size",
+        "/category",
+        "/manufacturer",
+        "/createPaymentLink",
+        "/checkPaymentLink",
+        "/recieveWebhook",
+        "/transaction/walletWebhook"
     };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF (tuỳ chọn)
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
-                        .requestMatchers(HttpMethod.PUT, PUBLIC_ENDPOINT).permitAll()
-                        .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT).permitAll()
-                        .anyRequest().authenticated()
-                );
-        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwtConfigurer -> jwtConfigurer
-                        .decoder(jwtDecoder())
-                        .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                )
-                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-        );
+                .authorizeHttpRequests(requests -> requests.requestMatchers(HttpMethod.POST, publicEnpoints)
+                        .permitAll()
+                        .requestMatchers(HttpMethod.PUT, publicEnpoints)
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, publicEnpoints)
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated());
+        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
+                        jwtConfigurer.decoder(jwtDecoder()).jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         return httpSecurity.build();
     }
 
     @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter(){
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
@@ -72,18 +77,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    JwtDecoder jwtDecoder(){
-        SecretKeySpec secretKeySpec = new SecretKeySpec(SERCRET_KEY.getBytes(), "HS512");
-        NimbusJwtDecoder nimbusJwtDecoder = NimbusJwtDecoder
-                .withSecretKey(secretKeySpec)
+    JwtDecoder jwtDecoder() {
+        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "HS512");
+        return NimbusJwtDecoder.withSecretKey(secretKeySpec)
                 .macAlgorithm(MacAlgorithm.HS512)
                 .build();
-        return nimbusJwtDecoder;
     }
-
 }

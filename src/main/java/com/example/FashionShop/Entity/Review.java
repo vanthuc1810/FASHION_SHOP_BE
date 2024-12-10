@@ -1,13 +1,16 @@
 package com.example.FashionShop.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Builder
@@ -17,10 +20,12 @@ import java.time.LocalDate;
 @Data
 public class Review {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String idReview;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer idReview;
+
     @Column(length = 600)
     String comment;
+
     int star;
     LocalDate postedTime;
 

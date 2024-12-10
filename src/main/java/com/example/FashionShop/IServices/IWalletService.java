@@ -1,5 +1,3 @@
 package com.example.FashionShop.IServices;
 
-public interface IWalletService {
-
-}
+public interface IWalletService {}

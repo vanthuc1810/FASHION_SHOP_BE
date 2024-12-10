@@ -1,14 +1,17 @@
 package com.example.FashionShop.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Data
@@ -18,12 +21,13 @@ import java.util.List;
 @Builder
 public class Card {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String idCard;
-    double totalPrice;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer idCard;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "card" , fetch = FetchType.LAZY , cascade = CascadeType.ALL)
+    float totalPrice;
+
+//    @JsonIgnore
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<CardItem> cardItems = new ArrayList<>();
 
     @OneToOne(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

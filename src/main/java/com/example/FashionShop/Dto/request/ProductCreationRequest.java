@@ -1,8 +1,5 @@
 package com.example.FashionShop.Dto.request;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 public class ProductCreationRequest {
-    String idCategory;
+    Integer idCategory;
     String description;
     String manufacturer;
     String images;

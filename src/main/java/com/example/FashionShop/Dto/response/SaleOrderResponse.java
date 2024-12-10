@@ -9,9 +9,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class SaleOrderResponse {
-    String idSalesOrder;
-    String idCard;
-    String idShippingAddress;
-    String idUser;
+    Integer idSalesOrder;
+    Integer idCard;
+    Integer idShippingAddress;
+    Integer idUser;
     String status;
+    String paymentMethod;
 }

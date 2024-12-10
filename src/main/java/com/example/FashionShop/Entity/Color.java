@@ -1,12 +1,15 @@
 package com.example.FashionShop.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
+
 import jakarta.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.List;
-import java.util.Set;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Data
@@ -18,7 +21,7 @@ public class Color {
     @Id
     String nameColor;
 
-    @ManyToMany(mappedBy = "colors")
+    @OneToMany(mappedBy = "color", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    List<Product> products;
+    List<ColorProduct> colorProducts;
 }

@@ -1,10 +1,12 @@
 package com.example.FashionShop.Entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Builder
@@ -14,8 +16,8 @@ import org.hibernate.annotations.OnDeleteAction;
 @Data
 public class SalesOrder {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String idSalesOrder;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer idSalesOrder;
 
     String status;
     String paymentMethod;

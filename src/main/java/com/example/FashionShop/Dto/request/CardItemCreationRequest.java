@@ -9,7 +9,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class CardItemCreationRequest {
-    double price;
     int quantity;
-    String idProduct;
+    Integer idProduct;
+    String color;
+    String size;
 }

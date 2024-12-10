@@ -1,14 +1,17 @@
 package com.example.FashionShop.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Data
@@ -18,17 +21,13 @@ import java.util.List;
 @Builder
 public class ShippingAddress {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String idShippingAddress;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer idShippingAddress;
     String address;
-    String city;
-    String state;
-    String zipcode;
-    String country;
-
     @Builder.Default
     boolean defaultAddress = false;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "shippingAddress")
     @OnDelete(action = OnDeleteAction.CASCADE)
     List<SalesOrder> salesOrders = new ArrayList<>();

@@ -1,7 +1,9 @@
 package com.example.FashionShop.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,19 +15,19 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class CardItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String idCardItem;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer idCardItem;
+
     int quantity;
     double price;
+    String color;
+    String size;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_product")
     Product product;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_card")
     Card card;
-
 }

@@ -1,6 +1,5 @@
 package com.example.FashionShop.Dto.response;
 
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

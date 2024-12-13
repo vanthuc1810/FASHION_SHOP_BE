@@ -1,6 +1,7 @@
 package com.example.FashionShop.Dto.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -19,6 +20,7 @@ public class UserCreationRequest {
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).*$", message = "PASSWORD_FORM_INVALID")
     String password;
 
+    @NotBlank(message = "FIELD_NOTBLANK")
     String name;
 
     @Email(message = "EMAIL_INVALID")
@@ -26,7 +28,10 @@ public class UserCreationRequest {
 
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "PHONENUMER_INVALID")
     String phone;
-
+    @NotBlank(message = "FIELD_NOTBLANK")
+    @Size(min = 0, max = 100, message = "ADDRESS_INVALID")
     String address;
+
+    @NotBlank(message = "FIELD_NOTBLANK")
     String role;
 }

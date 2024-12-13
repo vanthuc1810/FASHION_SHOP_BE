@@ -2,6 +2,8 @@ package com.example.FashionShop.Dto.request;
 
 import java.util.List;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +15,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SizeCreationRequest {
+    @NotEmpty(message = "SIZE_NOT_EMPTY")
     List<String> sizes;
+    @NotNull(message = "NULL_VALUE")
     Integer idProduct;
 }

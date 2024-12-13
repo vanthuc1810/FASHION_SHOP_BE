@@ -1,5 +1,6 @@
 package com.example.FashionShop.Controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.FashionShop.Dto.request.SalesOrderCreationRequest;
@@ -19,7 +20,7 @@ public class SalesOrderController {
     SalesOrderService salesOrderService;
 
     @PostMapping("/create")
-    public ApiResponse createSalesOrder(@RequestBody SalesOrderCreationRequest request) {
+    public ApiResponse createSalesOrder(@RequestBody @Valid SalesOrderCreationRequest request) {
         return salesOrderService.createSalesOrder(request);
     }
 

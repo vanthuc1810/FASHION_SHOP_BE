@@ -1,5 +1,6 @@
 package com.example.FashionShop.Controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.FashionShop.Dto.request.CardCreationRequest;
@@ -29,7 +30,7 @@ public class CardController {
         return cardService.getCartById(idCard);
     }
     @PostMapping("/create")
-    public ApiResponse createCard(@RequestBody CardCreationRequest request) {
+    public ApiResponse createCard(@RequestBody @Valid CardCreationRequest request) {
         return cardService.createCard(request);
     }
 }

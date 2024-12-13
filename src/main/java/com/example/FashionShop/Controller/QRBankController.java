@@ -2,6 +2,7 @@ package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.request.QRBank.PaymentLinkRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class QRBankController {
     QRBankService qrBankService;
 
     @PostMapping("/createQrCode")
-    public ResponseEntity createQrCode(@RequestBody CartRequest request) {
+    public ResponseEntity createQrCode(@RequestBody @Valid CartRequest request) {
 
         return qrBankService.callVietQRApi(request);
     }
@@ -34,7 +35,7 @@ public class QRBankController {
 
 
     @PostMapping("/createPaymentLink")
-    public CheckoutResponseData createPaymentLink(@RequestBody PaymentLinkRequest paymentLinkRequest) throws Exception {
+    public CheckoutResponseData createPaymentLink(@RequestBody @Valid PaymentLinkRequest paymentLinkRequest) throws Exception {
         return qrBankService.createPaymentLink(paymentLinkRequest);
     }
 

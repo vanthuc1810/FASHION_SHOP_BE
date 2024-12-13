@@ -1,5 +1,6 @@
 package com.example.FashionShop.Controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.FashionShop.Dto.request.CategoryCreationRequest;
@@ -19,7 +20,7 @@ public class CategoryController {
     CategoryService categoryService;
 
     @PostMapping("/create")
-    public ApiResponse createCategory(@RequestBody CategoryCreationRequest request) {
+    public ApiResponse createCategory(@RequestBody @Valid CategoryCreationRequest request) {
         return categoryService.createCategory(request);
     }
 
@@ -40,7 +41,7 @@ public class CategoryController {
 
     @PutMapping("/update/{idCategory}")
     public ApiResponse updateCategoryById(
-            @RequestBody CategoryUpdateRequest request, @PathVariable("idCategory") Integer idCategory) {
+            @RequestBody @Valid CategoryUpdateRequest request, @PathVariable("idCategory") Integer idCategory) {
         return categoryService.updateCategoryById(idCategory, request);
     }
 }

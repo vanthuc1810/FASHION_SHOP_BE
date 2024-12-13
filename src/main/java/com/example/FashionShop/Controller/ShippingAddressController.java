@@ -1,5 +1,6 @@
 package com.example.FashionShop.Controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.FashionShop.Dto.request.ShippingAddressCreationRequest;
@@ -21,13 +22,13 @@ public class ShippingAddressController {
     ShippingAddressService shippingAddressService;
 
     @PostMapping("/create")
-    public ApiResponse createShippingAddress(@RequestBody ShippingAddressCreationRequest request) {
+    public ApiResponse createShippingAddress(@RequestBody @Valid ShippingAddressCreationRequest request) {
         return shippingAddressService.createShippingAddres(request);
     }
 
     @PutMapping("/update/{idShippingAddress}")
     public ApiResponse updateShippingAddress(
-            @RequestBody ShippingAddressUpdateRequest request,
+            @RequestBody @Valid ShippingAddressUpdateRequest request,
             @PathVariable("idShippingAddress") Integer idShippingAddress) {
         return shippingAddressService.updateShippingAddress(request, idShippingAddress);
     }

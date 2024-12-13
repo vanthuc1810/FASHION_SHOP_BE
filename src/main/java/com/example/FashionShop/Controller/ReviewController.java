@@ -1,6 +1,7 @@
 package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.response.ReviewResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.FashionShop.Dto.request.ReviewCreationRequest;
@@ -22,7 +23,7 @@ public class ReviewController {
     ReviewService reviewService;
 
     @PostMapping("/create")
-    public ApiResponse<ReviewResponse> createReview(@RequestBody ReviewCreationRequest request) {
+    public ApiResponse<ReviewResponse> createReview(@RequestBody @Valid ReviewCreationRequest request) {
         return reviewService.createReview(request);
     }
 

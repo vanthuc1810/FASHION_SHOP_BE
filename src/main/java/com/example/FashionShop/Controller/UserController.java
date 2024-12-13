@@ -43,12 +43,12 @@ public class UserController {
     }
 
     @PutMapping("/updateUser")
-    public ApiResponse updateUser(@RequestBody UpdateUserRequest request) {
+    public ApiResponse updateUser(@RequestBody @Valid UpdateUserRequest request) {
         return userService.updateUser(request);
     }
 
     @PutMapping("/topUpWallet")
-    public CheckoutResponseData topUpWallet(@RequestBody TopUpWalletRequest request) throws Exception {
+    public CheckoutResponseData topUpWallet(@RequestBody @Valid TopUpWalletRequest request) throws Exception {
         return userService.topUpWallet(request);
     }
 }

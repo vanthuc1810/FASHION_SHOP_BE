@@ -1,5 +1,6 @@
 package com.example.FashionShop.Controller;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,28 +36,28 @@ public class ProductController {
     }
 
     @PostMapping("/filterProduct")
-    public PageableResponse filterProducts(@RequestBody FilterProductRequest request, Pageable pageable) {
+    public PageableResponse filterProducts(@RequestBody @Valid FilterProductRequest request, Pageable pageable) {
         return productService.filterProducts(request, pageable);
     }
 
     @PostMapping("/create")
-    public ApiResponse createProduct(@RequestBody ProductCreationRequest request) {
+    public ApiResponse createProduct(@RequestBody @Valid ProductCreationRequest request) {
         return productService.createProduct(request);
     }
 
     @PutMapping("/update/{idProduct}")
     public ApiResponse updateProduct(
-            @PathVariable("idProduct") Integer idProduct, @RequestBody UpdateProductRequest request) {
+            @PathVariable("idProduct") Integer idProduct, @RequestBody @Valid UpdateProductRequest request) {
         return productService.updateProductById(idProduct, request);
     }
 
     @PutMapping("/addColor")
-    public ApiResponse addColorToProduct(@RequestBody ColorCreationRequest request) {
+    public ApiResponse addColorToProduct(@RequestBody @Valid ColorCreationRequest request) {
         return productService.addColorToProduct(request);
     }
 
     @PutMapping("/addSize")
-    public ApiResponse addSizeToProduct(@RequestBody SizeCreationRequest request) {
+    public ApiResponse addSizeToProduct(@RequestBody @Valid SizeCreationRequest request) {
         return productService.addSizeToProduct(request);
     }
 

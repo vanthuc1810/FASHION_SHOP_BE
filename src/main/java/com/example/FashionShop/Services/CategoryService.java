@@ -1,6 +1,7 @@
 package com.example.FashionShop.Services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -23,8 +24,20 @@ public class CategoryService {
     CategoryRepository categoryRepository;
 
     public ApiResponse createCategory(CategoryCreationRequest request) {
-        Category category = new Category().builder().name(request.getName()).build();
-        categoryRepository.save(category);
+        Optional<Category> existingCategory = categoryRepository.findByName(request.getName());
+        Category category = new Category();
+        if(!existingCategory.isPresent())
+        {
+            category = Category
+                    .builder()
+                    .name(request.getName())
+                    .build();
+            categoryRepository.save(category);
+        }else
+        {
+            throw new AppException(ErrorCode.CATEGORY_EXISTED);
+        }
+
         return new ApiResponse().builder().results(category).build();
     }
 

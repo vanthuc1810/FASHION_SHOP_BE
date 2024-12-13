@@ -3,6 +3,7 @@ package com.example.FashionShop.Controller;
 import java.nio.file.AccessDeniedException;
 import java.text.ParseException;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.FashionShop.Dto.request.AuthenticationRequest;
@@ -25,7 +26,7 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest authenticationRequest) throws AccessDeniedException {
+    public ApiResponse<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest authenticationRequest) throws AccessDeniedException {
         var result = authenticationService.authenticate(authenticationRequest);
         ApiResponse apiReponse = new ApiResponse();
         apiReponse.setResults(result);

@@ -205,7 +205,8 @@ public class ProductService implements IProductService{
         int idCategory = request.getIdCategory();
         List<String> colors = request.getColors();
         List<String> sizes = request.getSizes();
-
+        
+        // filter Manufacturer - Price - Colors - Size - Category
         Specification<Product> spec = Specification.where(ProductSpecification.hasManufacturer(manufacturer))
                 .and(ProductSpecification.hasColors(colors))
                 .and(ProductSpecification.hasSizes(sizes))

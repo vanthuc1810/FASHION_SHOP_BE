@@ -1,5 +1,6 @@
 package com.example.FashionShop.Dto.request;
 
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShippingAddressUpdateRequest {
+    @Size(min = 0, max = 100, message = "ADDRESS_INVALID")
     String address;
-    boolean defaultAddress;
+    boolean defaultAddress = false;
 }

@@ -1,7 +1,10 @@
 package com.example.FashionShop.Dto.request;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,9 +16,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FilterProductRequest {
-    List<String> sizes;
-    List<String> colors;
-    List<Long> prices;
-    String manufacturer;
-    int idCategory;
+    List<String> sizes = new ArrayList<>();
+    List<String> colors = new ArrayList<>();
+    List<Long> prices = Arrays.asList((long)0, (long)999999999);
+    String manufacturer = "";
+    int idCategory = 0;
 }

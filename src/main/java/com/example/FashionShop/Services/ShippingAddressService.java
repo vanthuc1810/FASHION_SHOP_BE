@@ -2,6 +2,7 @@ package com.example.FashionShop.Services;
 
 import java.util.List;
 
+import com.example.FashionShop.IServices.IShippingAddressService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +23,11 @@ import lombok.experimental.FieldDefaults;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ShippingAddressService {
+public class ShippingAddressService implements IShippingAddressService {
     ShippingAddressRepository shippingAddressRepository;
     UserRepository userRepository;
 
+    @Override
     public ApiResponse createShippingAddres(ShippingAddressCreationRequest request) {
         // GET INFOR USER
         var context = SecurityContextHolder.getContext();
@@ -40,7 +42,7 @@ public class ShippingAddressService {
         shippingAddressRepository.save(shippingAddress);
         return new ApiResponse().builder().results(shippingAddress).build();
     }
-
+    @Override
     public ApiResponse updateShippingAddress(ShippingAddressUpdateRequest request, Integer idShippingAddress) {
         ShippingAddress shippingAddress = shippingAddressRepository
                 .findById(idShippingAddress)
@@ -51,19 +53,19 @@ public class ShippingAddressService {
         shippingAddressRepository.save(shippingAddress);
         return new ApiResponse().builder().results(shippingAddress).build();
     }
-
+    @Override
     public ApiResponse deleteShippingAddress(Integer idShippingAddress) {
         shippingAddressRepository.deleteById(idShippingAddress);
         return new ApiResponse<>().builder().message("Xóa địa chỉ thành công!").build();
     }
-
+    @Override
     public ApiResponse getAllShippingAddress() {
         var context = SecurityContextHolder.getContext();
         String idUser = context.getAuthentication().getName();
         List<ShippingAddress> listShippingAddress = shippingAddressRepository.findAllByIdUser(idUser);
         return new ApiResponse().builder().results(listShippingAddress).build();
     }
-
+    @Override
     public ApiResponse getShippingAddressById(Integer idShippingAddress) {
         ShippingAddress shippingAddress = shippingAddressRepository
                 .findById(idShippingAddress)

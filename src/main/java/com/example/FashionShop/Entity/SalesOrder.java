@@ -8,6 +8,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Builder
 @AllArgsConstructor
@@ -21,18 +23,20 @@ public class SalesOrder {
 
     String status;
     String paymentMethod;
+    LocalDateTime timeCreated;
+    LocalDateTime timeFinished = null;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_card")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Card card;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "id_user")
     User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "id_shipping_address")
     ShippingAddress shippingAddress;

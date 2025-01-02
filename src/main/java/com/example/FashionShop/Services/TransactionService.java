@@ -6,6 +6,7 @@ import com.example.FashionShop.Entity.User;
 import com.example.FashionShop.Enum.ErrorCode;
 import com.example.FashionShop.Enum.TransactionSatus;
 import com.example.FashionShop.Exception.AppException;
+import com.example.FashionShop.IServices.ITransactionService;
 import com.example.FashionShop.Repository.TransactionRepository;
 import com.example.FashionShop.Repository.UserRepository;
 import lombok.AccessLevel;
@@ -15,16 +16,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import vn.payos.type.Webhook;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class TransactionService {
+public class TransactionService implements ITransactionService {
     TransactionRepository transactionRepository;
     UserRepository userRepository;
+
+    @Override
     public Transaction createTransaction(float amount) {
         var context = SecurityContextHolder.getContext();
         Integer idUser = Integer.parseInt(context.getAuthentication().getName());
@@ -39,14 +40,7 @@ public class TransactionService {
         return transaction;
     }
 
-    public ApiResponse test() {
-        long timeStamp = System.currentTimeMillis();
-        long salesOrder = 1;
-        String idCreate = timeStamp + String.format("%05d",salesOrder);
-        System.out.println(idCreate);
-        return null;
-    }
-
+    @Override
     public ApiResponse recieveWebhook(Webhook data) {
         try {
             // GET TRANSATION
@@ -68,7 +62,6 @@ public class TransactionService {
             System.out.println(e.toString());
         }
         return ApiResponse.builder().results(data.getData()).build();
-
     }
 
 }

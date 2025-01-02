@@ -1,11 +1,16 @@
 package com.example.FashionShop.Services;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.FashionShop.IServices.ISalesOrderService;
+import com.example.FashionShop.Mapper.SaleOrderMapper;
+import com.example.FashionShop.Specification.SaleOrderSpecification;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +37,14 @@ import lombok.experimental.FieldDefaults;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class SalesOrderService {
+public class SalesOrderService implements ISalesOrderService {
     SalesOrderRepository salesOrderRepository;
     CardRepository cardRepository;
     ShippingAddressRepository shippingAddressRepository;
     UserRepository userRepository;
+    SaleOrderMapper saleOrderMapper;
 
+    @Override
     public ApiResponse<SaleOrderResponse> createSalesOrder(SalesOrderCreationRequest request) {
         var context = SecurityContextHolder.getContext();
         String idUser = context.getAuthentication().getName();
@@ -54,6 +61,7 @@ public class SalesOrderService {
                 .user(user)
                 .shippingAddress(shippingAddress)
                 .card(card)
+                .timeCreated(LocalDateTime.now())
                 .paymentMethod(request.getPaymentMethod())
                 .status(SalesOrderStatus.CREATED.name())
                 .build();
@@ -66,7 +74,7 @@ public class SalesOrderService {
         }
         salesOrderRepository.save(salesOrder);
         return ApiResponse.<SaleOrderResponse>builder()
-                .results(new SaleOrderResponse()
+                .results(SaleOrderResponse
                         .builder()
                         .idCard(salesOrder.getCard().getIdCard())
                         .idSalesOrder(salesOrder.getIdSalesOrder())
@@ -76,7 +84,7 @@ public class SalesOrderService {
                         .build())
                 .build();
     }
-
+    @Override
     public ApiResponse getAllSalesOrder() {
         var contex = SecurityContextHolder.getContext();
         String idUser = contex.getAuthentication().getName();
@@ -99,6 +107,7 @@ public class SalesOrderService {
     }
 
     @PostAuthorize("returnObject.idUser.toString() == authentication.name")
+    @Override
     public SaleOrderResponse getSalesOrderById(Integer idSalesOrder) {
         var contex = SecurityContextHolder.getContext();
         String idUser = contex.getAuthentication().getName();
@@ -106,20 +115,14 @@ public class SalesOrderService {
         SalesOrder salesOrder = salesOrderRepository
                 .findById(idSalesOrder)
                 .orElseThrow(() -> new AppException(ErrorCode.SALES_ORDER_NOTFOUND));
-        return SaleOrderResponse
-                .builder()
-                .idCard(salesOrder.getCard().getIdCard())
-                .idSalesOrder(salesOrder.getIdSalesOrder())
-                .idShippingAddress(salesOrder.getShippingAddress().getIdShippingAddress())
-                .idUser(salesOrder.getUser().getIdUser())
-                .status(salesOrder.getStatus())
-                .paymentMethod(salesOrder.getPaymentMethod())
-                .build();
+        SaleOrderResponse saleOrderResponse = saleOrderMapper.toSaleOrderResponse(salesOrder);
+        return saleOrderResponse;
     }
 
 
 
     @Transactional
+    @Override
     public SaleOrderResponse cancleOrder(Integer idSalesOrder) {
         SalesOrder salesOrder = salesOrderRepository.findById(idSalesOrder).orElseThrow(() -> new AppException(ErrorCode.SALES_ORDER_NOTFOUND));
         if(salesOrder.getStatus().equals(SalesOrderStatus.IN_PROGRESS.name()))
@@ -144,6 +147,7 @@ public class SalesOrderService {
     }
 
     @PostAuthorize("returnObject.idUser.toString() == authentication.name")
+    @Override
     public SaleOrderResponse completeSaleOrder(Integer idSalesOrder) {
         SalesOrder salesOrder = salesOrderRepository.findById(idSalesOrder).orElseThrow(() -> new AppException(ErrorCode.SALES_ORDER_NOTFOUND));
         if(salesOrder.getStatus().equals(SalesOrderStatus.IN_PROGRESS.name()))
@@ -161,4 +165,58 @@ public class SalesOrderService {
                 .idCard(salesOrder.getCard().getIdCard())
                 .build();
     }
+    @Override
+    public List<SaleOrderResponse> getSaleOrdersBySpec(LocalDateTime start, LocalDateTime end, String name, Integer idCategory, String status)
+    {
+        Specification<SalesOrder> specHasTime = Specification.where(SaleOrderSpecification.hasTimeBetween(start, end));
+        Specification<SalesOrder> specHasName = Specification.where(SaleOrderSpecification.hasManufracturer(name));
+        Specification<SalesOrder> specHasIdCategory = Specification.where(SaleOrderSpecification.hasIdCategory(idCategory));
+        Specification<SalesOrder> specHasSatus = Specification.where(SaleOrderSpecification.hasStatus(status));
+
+        Specification<SalesOrder> spec = specHasTime
+                                        .and(specHasName)
+                                        .and(specHasIdCategory)
+                                        .and(specHasSatus);
+        Sort sort = Sort.by(Sort.Direction.ASC, "timeFinished");
+        List<SalesOrder> listSaleOrder = salesOrderRepository.findAll(spec, sort);
+        List<SaleOrderResponse> listSaleOrderResponse = new ArrayList<>();
+
+        for(SalesOrder salesOrder : listSaleOrder)
+        {
+            SaleOrderResponse saleOrderResponse = saleOrderMapper.toSaleOrderResponse(salesOrder);
+            listSaleOrderResponse.add(saleOrderResponse);
+        }
+        return listSaleOrderResponse;
+    }
+    @Override
+    public List<SaleOrderResponse> getSaleOrdersByManufracturer(String name)
+    {
+        Specification<SalesOrder> spec = Specification.where(SaleOrderSpecification.hasManufracturer(name));
+
+        List<SalesOrder> listSaleOrder = salesOrderRepository.findAll(spec);
+        List<SaleOrderResponse> listSaleOrderResponse = new ArrayList<>();
+
+        for(SalesOrder salesOrder : listSaleOrder)
+        {
+            SaleOrderResponse saleOrderResponse = saleOrderMapper.toSaleOrderResponse(salesOrder);
+            listSaleOrderResponse.add(saleOrderResponse);
+        }
+        return listSaleOrderResponse;
+    }
+    @Override
+    public List<SaleOrderResponse> getSaleOrdersByIdCategory(Integer idCategory)
+    {
+        Specification<SalesOrder> spec = Specification.where(SaleOrderSpecification.hasIdCategory(idCategory));
+
+        List<SalesOrder> listSaleOrder = salesOrderRepository.findAll(spec);
+        List<SaleOrderResponse> listSaleOrderResponse = new ArrayList<>();
+
+        for(SalesOrder salesOrder : listSaleOrder)
+        {
+            SaleOrderResponse saleOrderResponse = saleOrderMapper.toSaleOrderResponse(salesOrder);
+            listSaleOrderResponse.add(saleOrderResponse);
+        }
+        return listSaleOrderResponse;
+    }
+
 }

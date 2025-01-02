@@ -32,6 +32,5 @@ public class UserCreationRequest {
     @Size(min = 0, max = 100, message = "ADDRESS_INVALID")
     String address;
 
-    @NotBlank(message = "FIELD_NOTBLANK")
     String role;
 }

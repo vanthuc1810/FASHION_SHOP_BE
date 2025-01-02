@@ -22,11 +22,6 @@ import vn.payos.type.Webhook;
 public class QRBankController {
     QRBankService qrBankService;
 
-    @PostMapping("/createQrCode")
-    public ResponseEntity createQrCode(@RequestBody @Valid CartRequest request) {
-
-        return qrBankService.callVietQRApi(request);
-    }
 
     @PostMapping("/recieveWebhook")
     public ApiResponse recieveWebhook(@RequestBody Webhook data) throws Exception {
@@ -40,7 +35,7 @@ public class QRBankController {
     }
 
     @PostMapping("/checkPaymentLink")
-    public PaymentLinkData checkPaymentLink() throws Exception {
-        return qrBankService.checkPaymentLink();
+    public PaymentLinkData checkPaymentLink(Long idOrder) throws Exception {
+        return qrBankService.checkPaymentLink(idOrder);
     }
 }

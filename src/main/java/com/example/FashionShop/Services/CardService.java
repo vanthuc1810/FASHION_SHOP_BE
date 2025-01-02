@@ -8,6 +8,7 @@ import com.example.FashionShop.Dto.response.CardResponse;
 import com.example.FashionShop.Dto.response.ProductResponse;
 import com.example.FashionShop.Entity.Product;
 import com.example.FashionShop.Entity.User;
+import com.example.FashionShop.IServices.ICardService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,12 +31,13 @@ import lombok.experimental.FieldDefaults;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class CardService {
+public class CardService implements ICardService {
     CardRepository cardRepository;
     CardItemService cardItemService;
     CardItemRepository cardItemRepository;
     UserRepository userRepository;
 
+    @Override
     @Transactional
     public ApiResponse createCard(CardCreationRequest request) {
         float total_price = 0;
@@ -59,7 +61,7 @@ public class CardService {
         cardRepository.save(card);
         return new ApiResponse<>().builder().results(card).build();
     }
-
+    @Override
     public ApiResponse getAllCart()
     {
         var context = SecurityContextHolder.getContext();
@@ -70,7 +72,7 @@ public class CardService {
                 .results(cardRepository.findAllByIdUser(user.getIdUser()))
                 .build();
     }
-
+    @Override
     public ApiResponse getCartById(Integer idCard)
     {
         Card card = cardRepository.findById(idCard).orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));

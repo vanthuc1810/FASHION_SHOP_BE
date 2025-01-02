@@ -1,0 +1,69 @@
+package com.example.FashionShop.Specification;
+
+import com.example.FashionShop.Entity.*;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.time.LocalDateTime;
+
+public class SaleOrderSpecification {
+    public static Specification<SalesOrder> hasTimeBetween(LocalDateTime start, LocalDateTime end) {
+        return (root, query, criteriaBuilder) -> {
+            if (start != null && end != null) {
+                return criteriaBuilder.between(root.get("timeFinished"), start, end);
+            } else if (start != null) {
+                return criteriaBuilder.greaterThanOrEqualTo(root.get("timeFinished"), start);
+            } else if (end != null) {
+                return criteriaBuilder.lessThanOrEqualTo(root.get("timeFinished"), end);
+            }
+            return criteriaBuilder.conjunction(); // Không có điều kiện
+        };
+    }
+    public static Specification<SalesOrder> hasManufracturer(String name) {
+        return (root, query, criteriaBuilder) -> {
+            if (name == null || name.isEmpty()) {
+                return criteriaBuilder.conjunction(); // Return an empty conjunction if name is null or empty
+            } else {
+                // Join to relevant tables
+                Join<SalesOrder, Card> cardJoin = root.join("card", JoinType.INNER);
+                Join<Card, CardItem> cardItemJoin = cardJoin.join("cardItems", JoinType.INNER);
+                Join<CardItem, Product> productJoin = cardItemJoin.join("product", JoinType.INNER);
+
+                // Create the condition
+                Predicate hasManufacturer = criteriaBuilder.equal(productJoin.get("manufacturer"), name);
+                return hasManufacturer;
+            }
+        };
+    }
+    public static Specification<SalesOrder> hasIdCategory(Integer idCategory) {
+        return (root, query, criteriaBuilder) -> {
+            if (idCategory == null) {
+                return criteriaBuilder.conjunction(); // Return an empty conjunction if name is null or empty
+            } else {
+                // Join to relevant tables
+                Join<SalesOrder, Card> cardJoin = root.join("card", JoinType.INNER);
+                Join<Card, CardItem> cardItemJoin = cardJoin.join("cardItems", JoinType.INNER);
+                Join<CardItem, Product> productJoin = cardItemJoin.join("product", JoinType.INNER);
+                Join<Product, Category> categoryJoin = productJoin.join("category", JoinType.INNER);
+
+
+                // Create the condition
+                Predicate hasIdCategory = criteriaBuilder.equal(categoryJoin.get("idCategory"), idCategory);
+                return hasIdCategory;
+            }
+        };
+    }
+    public static Specification<SalesOrder> hasStatus(String status) {
+        return (root, query, criteriaBuilder) -> {
+            if (status == null || status.isEmpty()) {
+                return criteriaBuilder.conjunction(); // Return an empty conjunction if name is null or empty
+            } else {
+                // Create the condition
+                Predicate hasStatus = criteriaBuilder.equal(root.get("status"), status);
+                return hasStatus;
+            }
+        };
+    }
+}

@@ -26,7 +26,7 @@ public class Card {
 
     float totalPrice;
 
-//    @JsonIgnore
+    @JsonIgnore
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<CardItem> cardItems = new ArrayList<>();
 

@@ -19,20 +19,10 @@ import vn.payos.type.Webhook;
 public class TransactionController {
     TransactionService transactionService;
 
-//    @PostMapping("/create")
-//    public Transaction createTransaction()
-//    {
-//        return transactionService.createTransaction();
-//    }
-
     @PostMapping("/walletWebhook")
     public ApiResponse topUpWalletWebhook(@RequestBody Webhook data) throws Exception {
         return transactionService.recieveWebhook(data);
     }
-    @PostMapping("/test")
-    public ApiResponse test()
-    {
-        return transactionService.test();
-    }
+
 
 }

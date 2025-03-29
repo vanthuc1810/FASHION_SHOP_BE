@@ -9,6 +9,9 @@ import com.example.FashionShop.Dto.response.ProductResponse;
 import com.example.FashionShop.Entity.Product;
 import com.example.FashionShop.Entity.User;
 import com.example.FashionShop.IServices.ICardService;
+import com.example.FashionShop.Mapper.CardItemMapper;
+import com.example.FashionShop.Mapper.CardMapper;
+import com.example.FashionShop.Mapper.ProductMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +39,9 @@ public class CardService implements ICardService {
     CardItemService cardItemService;
     CardItemRepository cardItemRepository;
     UserRepository userRepository;
+    ProductMapper productMapper;
+    CardItemMapper cardItemMapper;
+    CardMapper cardMapper;
 
     @Override
     @Transactional
@@ -82,38 +88,12 @@ public class CardService implements ICardService {
         {
             Product product = cardItem.getProduct();
             originPrice += product.getPrice() * cardItem.getQuantity();
-            ProductResponse productResponse = ProductResponse
-                    .builder()
-                    .idProduct(product.getIdProduct())
-                    .description(product.getDescription())
-                    .manufacturer(product.getManufacturer())
-                    .name(product.getName())
-                    .images(product.getImages())
-                    .discount(product.getDiscount())
-                    .price(product.getPrice())
-                    .deleted(product.isDeleted())
-                    .unitStock(product.getUnitStock())
-                    .build();
-            CardItemResponse response = CardItemResponse
-                    .builder()
-                    .idCardItem(cardItem.getIdCardItem())
-                    .price(cardItem.getPrice())
-                    .quantity(cardItem.getQuantity())
-                    .color(cardItem.getColor())
-                    .size(cardItem.getSize())
-                    .product(productResponse)
-                    .build();
+
+            ProductResponse productResponse = productMapper.toProductResponse(product);
+            CardItemResponse response = cardItemMapper.toCardItemResponse(cardItem, productResponse);
             listCardItemResponse.add(response);
         }
-        // get origin price
-
-        CardResponse cardResponse = CardResponse
-                .builder()
-                .idCard(card.getIdCard())
-                .totalPrice(card.getTotalPrice())
-                .cardItems(listCardItemResponse)
-                .originPrice(originPrice)
-                .build();
+        CardResponse cardResponse = cardMapper.toCardResponse(card, listCardItemResponse, originPrice);
         return ApiResponse
                 .builder()
                 .results(cardResponse)

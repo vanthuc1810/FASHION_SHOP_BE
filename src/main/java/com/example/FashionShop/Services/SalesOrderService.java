@@ -65,6 +65,7 @@ public class SalesOrderService implements ISalesOrderService {
                 .paymentMethod(request.getPaymentMethod())
                 .status(SalesOrderStatus.CREATED.name())
                 .build();
+
         if (salesOrder.getPaymentMethod().equals(PaymentMethod.BANK_TRANSFER.getName())) {
             salesOrder.setStatus(SalesOrderStatus.PENDING_PAYMENT.name());
         } else if (salesOrder.getPaymentMethod().equals(PaymentMethod.CASH.getName())) {
@@ -73,15 +74,10 @@ public class SalesOrderService implements ISalesOrderService {
             salesOrder.setStatus(SalesOrderStatus.CREATED.name());
         }
         salesOrderRepository.save(salesOrder);
+
+        SaleOrderResponse saleOrderResponse = saleOrderMapper.toSaleOrderResponse(salesOrder);
         return ApiResponse.<SaleOrderResponse>builder()
-                .results(SaleOrderResponse
-                        .builder()
-                        .idCard(salesOrder.getCard().getIdCard())
-                        .idSalesOrder(salesOrder.getIdSalesOrder())
-                        .idUser(salesOrder.getUser().getIdUser())
-                        .idShippingAddress(salesOrder.getShippingAddress().getIdShippingAddress())
-                        .status(salesOrder.getStatus())
-                        .build())
+                .results(saleOrderResponse)
                 .build();
     }
     @Override
@@ -92,15 +88,7 @@ public class SalesOrderService implements ISalesOrderService {
         List<SaleOrderResponse> results = new ArrayList<>();
         for (SalesOrder salesOrder: listSalesOrder)
         {
-            SaleOrderResponse response = SaleOrderResponse
-                    .builder()
-                    .idSalesOrder(salesOrder.getIdSalesOrder())
-                    .idCard(salesOrder.getCard().getIdCard())
-                    .idShippingAddress(salesOrder.getShippingAddress().getIdShippingAddress())
-                    .idUser(salesOrder.getUser().getIdUser())
-                    .status(salesOrder.getStatus())
-                    .paymentMethod(salesOrder.getPaymentMethod())
-                    .build();
+            SaleOrderResponse response = saleOrderMapper.toSaleOrderResponse(salesOrder);
             results.add(response);
         }
         return new ApiResponse().builder().results(results).build();
@@ -135,15 +123,8 @@ public class SalesOrderService implements ISalesOrderService {
         float currentWallet = user.getWallet();
         user.setWallet(currentWallet + salesOrder.getCard().getTotalPrice());
         ///
-        return SaleOrderResponse
-                .builder()
-                .idSalesOrder(salesOrder.getIdSalesOrder())
-                .idUser(salesOrder.getUser().getIdUser())
-                .paymentMethod(salesOrder.getPaymentMethod())
-                .status(salesOrder.getStatus())
-                .idShippingAddress(salesOrder.getShippingAddress().getIdShippingAddress())
-                .idCard(salesOrder.getCard().getIdCard())
-                .build();
+        SaleOrderResponse saleOrderResponse = saleOrderMapper.toSaleOrderResponse(salesOrder);
+        return saleOrderResponse;
     }
 
     @PostAuthorize("returnObject.idUser.toString() == authentication.name")
@@ -155,28 +136,23 @@ public class SalesOrderService implements ISalesOrderService {
             salesOrder.setStatus(SalesOrderStatus.COMPLETE.name());
             salesOrderRepository.save(salesOrder);
         }
-        return SaleOrderResponse
-                .builder()
-                .idSalesOrder(salesOrder.getIdSalesOrder())
-                .idUser(salesOrder.getUser().getIdUser())
-                .paymentMethod(salesOrder.getPaymentMethod())
-                .status(salesOrder.getStatus())
-                .idShippingAddress(salesOrder.getShippingAddress().getIdShippingAddress())
-                .idCard(salesOrder.getCard().getIdCard())
-                .build();
+        SaleOrderResponse saleOrderResponse = saleOrderMapper.toSaleOrderResponse(salesOrder);
+        return saleOrderResponse;
     }
     @Override
-    public List<SaleOrderResponse> getSaleOrdersBySpec(LocalDateTime start, LocalDateTime end, String name, Integer idCategory, String status)
+    public List<SaleOrderResponse> getSaleOrdersBySpec(LocalDateTime start, LocalDateTime end, String name, Integer idCategory, String status, Integer idUser)
     {
         Specification<SalesOrder> specHasTime = Specification.where(SaleOrderSpecification.hasTimeBetween(start, end));
         Specification<SalesOrder> specHasName = Specification.where(SaleOrderSpecification.hasManufracturer(name));
         Specification<SalesOrder> specHasIdCategory = Specification.where(SaleOrderSpecification.hasIdCategory(idCategory));
         Specification<SalesOrder> specHasSatus = Specification.where(SaleOrderSpecification.hasStatus(status));
+        Specification<SalesOrder> specHasIdUser = Specification.where(SaleOrderSpecification.hasIdUser(idUser));
 
         Specification<SalesOrder> spec = specHasTime
                                         .and(specHasName)
                                         .and(specHasIdCategory)
-                                        .and(specHasSatus);
+                                        .and(specHasSatus)
+                                        .and(specHasIdUser);
         Sort sort = Sort.by(Sort.Direction.ASC, "timeFinished");
         List<SalesOrder> listSaleOrder = salesOrderRepository.findAll(spec, sort);
         List<SaleOrderResponse> listSaleOrderResponse = new ArrayList<>();

@@ -2,6 +2,7 @@ package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.response.ReviewResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.FashionShop.Dto.request.ReviewCreationRequest;
@@ -27,19 +28,16 @@ public class ReviewController {
         return reviewService.createReview(request);
     }
 
-    @GetMapping("/get-review/{idReview}")
+    @GetMapping("/{idReview}")
     public ApiResponse<ReviewResponse> getReviewById(@PathVariable("idReview") Integer idReview) {
         return reviewService.getReviewById(idReview);
     }
 
-    @GetMapping("/get-review-by-idproduct/{idProduct}")
+    @GetMapping("")
     public PageableResponse getReviewByIdProduct(
-            @PathVariable("idProduct") Integer idProduct, @RequestParam int page, @RequestParam int size) {
-        return reviewService.getReviewByIdProduct(idProduct, page, size);
-    }
-
-    @GetMapping("/get-review-by-iduser/{idUser}")
-    public ApiResponse getReviewByIdUser(@PathVariable("idUser") Integer idUser) {
-        return reviewService.getReviewByIdUser(idUser);
+            @RequestParam(value = "idProduct", required = false) Integer idProduct,
+            @RequestParam(value = "idUser", required = false) Integer idUser,
+            Pageable pageable) {
+        return reviewService.getReviewByIdProduct(idProduct, idUser, pageable);
     }
 }

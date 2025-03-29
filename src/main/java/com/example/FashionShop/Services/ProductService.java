@@ -42,19 +42,11 @@ public class ProductService implements IProductService{
 
     @Override
     public ApiResponse createProduct(ProductCreationRequest request) {
-        Product product = new Product()
-                .builder()
-                .description(request.getDescription())
-                .manufacturer(request.getManufacturer())
-                .name(request.getName())
-                .images(request.getImages())
-                .discount(request.getDiscount())
-                .price(request.getPrice())
-                .unitStock(request.getUnitStock())
-                .category(categoryRepository
-                        .findById(request.getIdCategory())
-                        .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOTFOUND)))
-                .build();
+        Category category = categoryRepository
+                .findById(request.getIdCategory())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOTFOUND));
+
+        Product product = productMapper.toProduct(request, category);
         productRepository.save(product);
         return new ApiResponse().builder().results(product).build();
     }
@@ -141,31 +133,7 @@ public class ProductService implements IProductService{
     @Override
     public ApiResponse getProductById(Integer idProduct) {
         Product product = productRepository.findById(idProduct).orElseThrow(() -> new AppException());
-        List<String> colors = new ArrayList<>();
-        List<String> sizes = new ArrayList<>();
-        for (ColorProduct colorProduct : product.getColorProducts())
-        {
-            colors.add(colorProduct.getColor().getNameColor());
-        }
-
-        for (SizeProduct sizeProduct : product.getSizeProducts())
-        {
-            sizes.add(sizeProduct.getSize().getNameSize());
-        }
-        ProductResponse productResponse = ProductResponse
-                .builder()
-                .idProduct(product.getIdProduct())
-                .description(product.getDescription())
-                .manufacturer(product.getManufacturer())
-                .name(product.getName())
-                .images(product.getImages())
-                .discount(product.getDiscount())
-                .price(product.getPrice())
-                .deleted(product.isDeleted())
-                .unitStock(product.getUnitStock())
-                .colors(colors)
-                .sizes(sizes)
-                .build();
+        ProductResponse productResponse = productMapper.toProductResponse(product);
         return new ApiResponse().builder().results(productResponse).build();
     }
 
@@ -179,12 +147,7 @@ public class ProductService implements IProductService{
     public ApiResponse updateProductById(Integer idProduct, UpdateProductRequest request) {
         Product product =
                 productRepository.findById(idProduct).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOTFOUND));
-        product.setDescription(request.getDescription());
-        product.setManufacturer(request.getManufacturer());
-        product.setName(request.getName());
-        product.setDiscount(request.getDiscount());
-        product.setPrice(request.getPrice());
-        product.setUnitStock(request.getUnitStock());
+//        product = productMapper.toUpdateProduct(product, request);
         productRepository.save(product);
         return new ApiResponse().builder().results(product).build();
     }
@@ -243,14 +206,4 @@ public class ProductService implements IProductService{
                 .number(listProducts.getNumber())
                 .build();
     }
-
-    public ApiResponse test()
-    {
-        List<String> listColors = Arrays.asList("Medium", "#123");
-        Specification<Product> spec = Specification
-                .where(ProductSpecification.hasSizes(listColors));
-        List<Product> listProduct = productRepository.findAll(spec);
-        return ApiResponse.builder().results(listProduct).build();
-    }
-
 }

@@ -25,7 +25,10 @@ public class SalesOrderController {
     }
 
     @GetMapping()
-    public ApiResponse getAllSalesOrder() {
+    public ApiResponse getAllSalesOrder(
+            @RequestParam(required = false) Integer idUser,
+            @RequestParam(required = false) Integer idProduct,
+            @RequestParam(required = false) Integer idShippingAddress) {
         return salesOrderService.getAllSalesOrder();
     }
 
@@ -45,19 +48,4 @@ public class SalesOrderController {
     {
         return salesOrderService.cancleOrder(idSalesOrder);
     }
-
-//    @PutMapping("/confirm-order/{idSalesOrder}")
-//    public SaleOrderResponse confirmSaleOrder(@PathVariable("idSalesOrder") String idSalesOrder) {
-//        return salesOrderService.confirmSaleOrder(idSalesOrder);
-//    }
-
-//    @PutMapping("/confirm-pickup/{idSalesOrder}")
-//    public SaleOrderResponse confirmPickUp(@PathVariable("idSalesOrder") String idSalesOrder) {
-//        return salesOrderService.confirmPickUp(idSalesOrder);
-//    }
-
-//    @PutMapping("/cancle/{idSalesOrder}")
-//    public SaleOrderResponse canclePickUp(@PathVariable("idSalesOrder") String idSalesOrder) {
-//        return salesOrderService.cancleOrder(idSalesOrder);
-//    }
 }

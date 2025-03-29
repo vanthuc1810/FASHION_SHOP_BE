@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class UpdateProductRequest {
     @NotNull(message = "NULL_VALUE")
-    String idCategory;
+    public Integer idCategory;
     @Size(min = 0, max = 400, message = "SIZE_DESCRIPTION_INVALID")
     String description;
     @Size(min = 0, max = 20, message = "SIZE_MANUFACTURER_INVALID")
@@ -32,5 +32,5 @@ public class UpdateProductRequest {
     @Min(value = 0, message = "PRICE_INVALID")
     double price;
     @Size(min = 2, max = 4, message = "UNITSTOCK_INVALID")
-    String unitStock;
+    String unitStock = "VND";
 }

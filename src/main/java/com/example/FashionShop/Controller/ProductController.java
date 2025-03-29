@@ -66,9 +66,4 @@ public class ProductController {
         return productService.deleteProductById(idProduct);
     }
 
-    @GetMapping("/test")
-    public ApiResponse test(){
-        return productService.test();
-    }
-
 }

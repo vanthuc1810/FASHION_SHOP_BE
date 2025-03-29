@@ -66,4 +66,17 @@ public class SaleOrderSpecification {
             }
         };
     }
+    public static Specification<SalesOrder> hasIdUser(Integer idUser) {
+        return (root, query, criteriaBuilder) -> {
+            if (idUser == null) {
+                return criteriaBuilder.conjunction(); // Return an empty conjunction if name is null or empty
+            } else {
+                // Join table
+                Join<User, SalesOrder> userJoin = root.join("user", JoinType.INNER);
+                // Create the condition
+                Predicate hasIdUser = criteriaBuilder.equal(userJoin.get("idUser"), idUser);
+                return hasIdUser;
+            }
+        };
+    }
 }

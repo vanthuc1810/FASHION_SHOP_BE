@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public interface IRevenueService {
 
     @PreAuthorize("hasRole('ADMIN')")
-    RevenueResponse report(LocalDateTime start, LocalDateTime end, String name, Integer idCategory, String status);
+    RevenueResponse report(LocalDateTime start, LocalDateTime end, String name, Integer idCategory, String status, Integer idUser);
 
     @PreAuthorize("hasRole('ADMIN')")
     void exportPDF (HttpServletResponse response,
@@ -18,5 +18,6 @@ public interface IRevenueService {
                     LocalDateTime end,
                     String name,
                     Integer idCategory,
-                    String status) throws IOException;
+                    String status,
+                    Integer idUser) throws IOException;
 }

@@ -28,8 +28,9 @@ public class RevenueController {
             @RequestParam(required = false) LocalDateTime end,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer idCategory,
+            @RequestParam(required = false) Integer idUser,
             @RequestParam(required = false) String status) {
-        return revenueService.report(start, end, name, idCategory, status);
+        return revenueService.report(start, end, name, idCategory, status, idUser);
     }
 
 
@@ -39,7 +40,8 @@ public class RevenueController {
                        @RequestParam(required = false) LocalDateTime end,
                        @RequestParam(required = false) String name,
                        @RequestParam(required = false) Integer idCategory,
+                       @RequestParam(required = false) Integer idUser,
                        @RequestParam(required = false) String status) throws IOException {
-        revenueService.exportPDF(response, start, end, name, idCategory, status);
+        revenueService.exportPDF(response, start, end, name, idCategory, status, idUser);
     }
 }

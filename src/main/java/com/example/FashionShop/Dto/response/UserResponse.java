@@ -16,6 +16,7 @@ public class UserResponse {
     String address;
     String userName;
     String password;
+    String role;
     float wallet;
-
+    boolean isAvaialbe;
 }

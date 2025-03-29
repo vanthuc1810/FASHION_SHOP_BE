@@ -32,6 +32,7 @@ public class SecurityConfig {
 
     private final String[] publicEnpoints = {
         "/auth/login",
+        "/auth/refresh",
         "/product/*",
         "/review",
         "/review/**",
@@ -45,25 +46,28 @@ public class SecurityConfig {
         "/createPaymentLink",
         "/checkPaymentLink",
         "/recieveWebhook",
-        "/transaction/walletWebhook"
+        "/transaction/walletWebhook",
+        "/ws"
     };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF (tuỳ chọn)
-                .authorizeHttpRequests(requests -> requests.requestMatchers(HttpMethod.POST, publicEnpoints)
-                        .permitAll()
-                        .requestMatchers(HttpMethod.PUT, publicEnpoints)
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, publicEnpoints)
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated());
-        httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
-                        jwtConfigurer.decoder(jwtDecoder()).jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+                .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(HttpMethod.POST, publicEnpoints).permitAll()
+                        .requestMatchers(HttpMethod.PUT, publicEnpoints).permitAll()
+                        .requestMatchers(HttpMethod.GET, publicEnpoints).permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/ws").permitAll()
+
+                        .anyRequest().authenticated())  // Bảo vệ tất cả yêu cầu khác
+
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
+                                jwtConfigurer.decoder(jwtDecoder()).jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+
         return httpSecurity.build();
     }
 

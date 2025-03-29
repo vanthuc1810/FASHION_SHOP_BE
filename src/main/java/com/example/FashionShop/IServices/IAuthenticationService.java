@@ -7,6 +7,7 @@ import com.example.FashionShop.Dto.request.IntrospectRequest;
 import com.example.FashionShop.Dto.response.AuthenticationResponse;
 import com.example.FashionShop.Dto.response.IntrospectResponse;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.SignedJWT;
 
 public interface IAuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest request);
@@ -14,4 +15,8 @@ public interface IAuthenticationService {
     public String genToken(String username);
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException;
+
+    SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException;
+
+    AuthenticationResponse refreshToken(IntrospectRequest request) throws ParseException, JOSEException;
 }

@@ -18,4 +18,6 @@ public interface IUserSerive {
     public ApiResponse updateUser(UpdateUserRequest request);
 
     public CheckoutResponseData topUpWallet(TopUpWalletRequest request) throws Exception;
+
+    void setAvaiable();
 }

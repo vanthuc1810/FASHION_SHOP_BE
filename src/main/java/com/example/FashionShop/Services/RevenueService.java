@@ -1,5 +1,6 @@
 package com.example.FashionShop.Services;
 
+
 import com.example.FashionShop.Dto.response.RevenueResponse;
 import com.example.FashionShop.Dto.response.SaleOrderResponse;
 import com.example.FashionShop.Entity.Card;
@@ -8,13 +9,10 @@ import com.example.FashionShop.Exception.AppException;
 import com.example.FashionShop.IServices.IRevenueService;
 import com.example.FashionShop.Repository.CardRepository;
 import com.example.FashionShop.Repository.SalesOrderRepository;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults; 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -23,9 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,11 +37,12 @@ public class RevenueService implements IRevenueService {
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public RevenueResponse report(LocalDateTime start,
-                                         LocalDateTime end,
-                                         String name,
-                                         Integer idCategory,
-                                         String status) {
-        List<SaleOrderResponse> listSaleOrderResponse = salesOrderService.getSaleOrdersBySpec(start, end, name, idCategory, status);
+                                  LocalDateTime end,
+                                  String name,
+                                  Integer idCategory,
+                                  String status,
+                                  Integer idUser) {
+        List<SaleOrderResponse> listSaleOrderResponse = salesOrderService.getSaleOrdersBySpec(start, end, name, idCategory, status, idUser);
         Long totalOrder = (long) listSaleOrderResponse.size();
         float totalPrice = 0;
         // Get total price
@@ -70,7 +67,8 @@ public class RevenueService implements IRevenueService {
                            LocalDateTime end,
                            String name,
                            Integer idCategory,
-                           String status) throws IOException {
+                           String status,
+                           Integer idUser) throws java.io.IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Sales Orders");
             Row headerRow = sheet.createRow(0);
@@ -91,7 +89,7 @@ public class RevenueService implements IRevenueService {
                 cell.setCellValue(header.get(i));
             }
             // In Du Lieu
-            RevenueResponse revenueResponse = report(start, end, name, idCategory, status);
+            RevenueResponse revenueResponse = report(start, end, name, idCategory, status, idUser);
             long totalOrder = revenueResponse.getTotalOrder();
             float totalPrice = revenueResponse.getTotalPrice();
             List<SaleOrderResponse> listSaleOrderResponse = revenueResponse.getOrders();
@@ -151,6 +149,8 @@ public class RevenueService implements IRevenueService {
 
             try (OutputStream outputStream = response.getOutputStream()) {
                 workbook.write(outputStream);
+            } catch (java.io.IOException e) {
+                throw new RuntimeException(e);
             }
 
             response.getOutputStream().flush();

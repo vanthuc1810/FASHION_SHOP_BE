@@ -21,17 +21,15 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer idUser;
-
     String userName;
     String password;
-
     String name;
     String email;
     String phone;
     String address;
     String role;
     float wallet;
-
+    boolean isAvaialbe;
     @OneToMany(mappedBy = "user")
     @OnDelete(action = OnDeleteAction.CASCADE)
     List<Review> reviews = new ArrayList<>();

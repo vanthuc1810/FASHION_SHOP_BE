@@ -23,7 +23,7 @@ public interface ISalesOrderService {
     @PostAuthorize("returnObject.idUser.toString() == authentication.name")
     SaleOrderResponse completeSaleOrder(Integer idSalesOrder);
 
-    List<SaleOrderResponse> getSaleOrdersBySpec(LocalDateTime start, LocalDateTime end, String name, Integer idCategory, String status);
+    List<SaleOrderResponse> getSaleOrdersBySpec(LocalDateTime start, LocalDateTime end, String name, Integer idCategory, String status, Integer idUser);
 
     List<SaleOrderResponse> getSaleOrdersByManufracturer(String name);
 

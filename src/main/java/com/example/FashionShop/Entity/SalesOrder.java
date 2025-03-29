@@ -40,4 +40,10 @@ public class SalesOrder {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "id_shipping_address")
     ShippingAddress shippingAddress;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "id_voucher")
+    Voucher voucher;
+
 }

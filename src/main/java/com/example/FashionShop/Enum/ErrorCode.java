@@ -39,7 +39,7 @@ public enum ErrorCode {
     SIZE_MANUFACTURER_INVALID(1024, "Tên nhà sản xuất không được quá 20 ký tự", HttpStatus.BAD_REQUEST),
     MANUFRACTURER_INVALID(1025, "Tên nhà sản xuất phải bắt đầu bằng 1 kí tự viết hoa và không chứa số", HttpStatus.BAD_REQUEST),
     SIZE_NAME_INVALID(1026, "Tên sản phẩm không được quá 20 ký tự", HttpStatus.BAD_REQUEST),
-    NAME_PRODUCT_INVALID(1027, "Tên nhà sản xuất phải bắt đầu bằng 1 kí tự viết hoa và không chứa số", HttpStatus.BAD_REQUEST),
+    NAME_PRODUCT_INVALID(1027, "Tên sản phẩm phải bắt đầu bằng 1 kí tự viết hoa và không chứa số", HttpStatus.BAD_REQUEST),
     DISCOUNT_INVALID(1028, "Discount phải có giá trị trong khoảng 0 - 100", HttpStatus.BAD_REQUEST),
     PRICE_INVALID(1029, "Giá sản phẩm không được âm", HttpStatus.BAD_REQUEST),
     UNITSTOCK_INVALID(1030, "Unitstock không được quá 2 - 4 kí tự", HttpStatus.BAD_REQUEST),
@@ -49,6 +49,11 @@ public enum ErrorCode {
     ADDRESS_INVALID(1034, "Địa chỉ không được quá 100 ký tự", HttpStatus.BAD_REQUEST),
     SIZE_NOT_EMPTY(1035, "Không được để trông size", HttpStatus.BAD_REQUEST),
     TOPUP_WALLET_INVALID(1036, "Giá trị phải ít nhất 2000 VND", HttpStatus.BAD_REQUEST),
+    VOUCHER_NOTFOUND(1037, "Voucher không tồn tại", HttpStatus.BAD_REQUEST),
+    FUTURE_OR_PRESENT_INVALID(1038, "Ngày trong quá khứ không hợp lệ!", HttpStatus.BAD_REQUEST),
+    START_DATE_MUST_BE_BEFORE_EXPIRATION_DATE(1039, "Start date phải trước ngày hết hạn", HttpStatus.BAD_REQUEST),
+    MIN_ORDER_VALUE_INVALID(1039, "Giá trị đơn hàng tối thiểu phải >= 0", HttpStatus.BAD_REQUEST),
+    DISCOUNT_AMOUNT_INVALID(1039, "Giá tiền discount phải >= 0", HttpStatus.BAD_REQUEST),
 
     ;
 

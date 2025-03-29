@@ -3,7 +3,13 @@ package com.example.FashionShop.Controller;
 import java.nio.file.AccessDeniedException;
 import java.text.ParseException;
 
+import com.example.FashionShop.Dto.request.RefreshRequest;
+import com.example.FashionShop.Entity.User;
+import com.example.FashionShop.Enum.ErrorCode;
+import com.example.FashionShop.Exception.AppException;
+import com.example.FashionShop.Repository.UserRepository;
 import jakarta.validation.Valid;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.FashionShop.Dto.request.AuthenticationRequest;
@@ -32,6 +38,11 @@ public class AuthenticationController {
         apiReponse.setResults(result);
         return apiReponse;
     }
+    @PostMapping("logout")
+    public void logout()
+    {
+        authenticationService.logout();
+    }
 
     @PostMapping("/introspect")
     public ApiResponse<IntrospectResponse> instrospect(@RequestBody IntrospectRequest request)
@@ -41,4 +52,11 @@ public class AuthenticationController {
         apiReponse.setResults(result);
         return apiReponse;
     }
+
+    @PostMapping("/refresh")
+    public AuthenticationResponse refreshToken(@RequestBody IntrospectRequest request)
+            throws ParseException, JOSEException {
+        return authenticationService.refreshToken(request);
+    }
+
 }

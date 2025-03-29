@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,17 @@ public class AuthenticationService implements IAuthenticationService {
     @Value("${jwt.secret}")
     protected String SIGNER_KEY;
 
+    public void logout() {
+        // set black jwt
+
+        // set avalable user
+        var context = SecurityContextHolder.getContext();
+        Integer idUser = Integer.parseInt(context.getAuthentication().getName());
+        User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        user.setAvaialbe(false);
+        userRepository.save(user);
+    }
+
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userRepository
@@ -50,7 +62,8 @@ public class AuthenticationService implements IAuthenticationService {
         if (!authenticated) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-
+        user.setAvaialbe(true);
+        userRepository.save(user);
         var token = genToken(request.getUserName());
         AuthenticationResponse authenticationRespone = new AuthenticationResponse()
                 .builder()
@@ -93,6 +106,50 @@ public class AuthenticationService implements IAuthenticationService {
 
         return IntrospectResponse.builder()
                 .authenticated(verified && expityTime.after(new Date()))
+                .build();
+    }
+    @Override
+    public SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = (isRefresh)
+                ? new Date(signedJWT
+                .getJWTClaimsSet()
+                .getIssueTime()
+                .toInstant()
+                .toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        return signedJWT;
+    }
+
+    @Override
+    public AuthenticationResponse refreshToken(IntrospectRequest request) throws ParseException, JOSEException {
+        IntrospectResponse signedJwt = introspect(request);
+        if(signedJwt.isAuthenticated())
+        {
+            var token = request.getToken();
+            JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            Integer idUser = Integer.parseInt(signedJWT.getJWTClaimsSet().getSubject());
+            User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+            String refreshToken = genToken(user.getUserName());
+            return AuthenticationResponse
+                    .builder()
+                    .token(refreshToken)
+                    .authenticated(true)
+                    .build();
+        }
+        return AuthenticationResponse
+                .builder()
+                .token(request.getToken())
+                .authenticated(false)
                 .build();
     }
 }

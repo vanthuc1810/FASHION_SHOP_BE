@@ -1,9 +1,12 @@
 package com.example.FashionShop.Services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.FashionShop.Dto.request.TopUpWalletRequest;
+import com.example.FashionShop.Entity.ShippingAddress;
 import com.example.FashionShop.Entity.Transaction;
+import com.example.FashionShop.Repository.ShippingAddressRepository;
 import com.example.FashionShop.Repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.experimental.NonFinal;
@@ -38,10 +41,12 @@ import vn.payos.type.PaymentData;
 @RequiredArgsConstructor
 public class UserService implements IUserSerive {
     UserRepository userRepository;
+    ShippingAddressRepository shippingAddressRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     TransactionService transactionService;
     TransactionRepository transactionRepository;
+
     @NonFinal
     @Value("${urlServer}")
     private String urlServer;
@@ -92,7 +97,13 @@ public class UserService implements IUserSerive {
         if (userRepository.existsByUserName(request.getUserName())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        userRepository.save(user);
+        // create shipping address
+        ShippingAddress shippingAddress = new ShippingAddress();
+        shippingAddress.setDefaultAddress(true);
+        shippingAddress.setAddress(request.getAddress());
+        shippingAddress.setUser(user);
+        user = userRepository.save(user);
+        shippingAddressRepository.save(shippingAddress);
         return new ApiResponse<>().builder().results(user).build();
     }
 
@@ -131,5 +142,14 @@ public class UserService implements IUserSerive {
         payOS.confirmWebhook(urlServer+"/transaction/walletWebhook");
 
         return checkoutResponseData;
+    }
+
+    @Override
+    public void setAvaiable() {
+        var context = SecurityContextHolder.getContext();
+        Integer idUser = Integer.parseInt(context.getAuthentication().getName());
+        User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        user.setAvaialbe(true);
+        userRepository.save(user);
     }
 }

@@ -51,4 +51,9 @@ public class UserController {
     public CheckoutResponseData topUpWallet(@RequestBody @Valid TopUpWalletRequest request) throws Exception {
         return userService.topUpWallet(request);
     }
+
+    @PutMapping("/setAvaiable")
+    public void setAvaiable() throws Exception {
+        userService.setAvaiable();
+    }
 }

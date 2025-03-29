@@ -3,10 +3,13 @@ package com.example.FashionShop.Services;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
+import com.example.FashionShop.Specification.ReviewSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -40,35 +43,16 @@ public class ReviewService implements IReviewService {
     ReviewMapper reviewMapper;
 
     @Override
-    @PostAuthorize("returnObject.results.idUser == authentication.name")
     public ApiResponse<ReviewResponse> createReview(ReviewCreationRequest request) {
-        var context = SecurityContextHolder.getContext();
-        String idUser = context.getAuthentication().getName();
-        User user = userRepository.findById(Integer.parseInt(idUser)).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
-        Product product = productRepository
-                .findById(request.getIdProduct())
+//      Get Product
+        Product product = productRepository.findById(request.getIdProduct())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOTFOUND));
-        LocalDate localDate = LocalDate.now();
-
-        Review review = new Review()
-                .builder()
-                .star(request.getStar())
-                .comment(request.getComment())
-                .postedTime(localDate)
-                .product(product)
-                .user(user)
-                .build();
+//      Get User
+        Integer idUser = Integer.parseInt(SecurityContextHolder.getContext().getAuthentication().getName());
+        User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        Review review = reviewMapper.toReview(request, product, user);
         reviewRepository.save(review);
-
-        ReviewResponse reviewResponse = new ReviewResponse()
-                .builder()
-                .star(request.getStar())
-                .idReview(review.getIdReview())
-                .comment(request.getComment())
-                .idProduct(product.getIdProduct())
-                .idUser(user.getIdUser())
-                .postedTime(localDate)
-                .build();
+        ReviewResponse reviewResponse = reviewMapper.toReviewResponse(review);
         return ApiResponse.<ReviewResponse>builder().results(reviewResponse).build();
     }
 
@@ -76,34 +60,20 @@ public class ReviewService implements IReviewService {
     public ApiResponse<ReviewResponse> getReviewById(Integer idReview) {
         Review review =
                 reviewRepository.findById(idReview).orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOTFOUND));
-        ReviewResponse reviewResponse = new ReviewResponse()
-                .builder()
-                .star(review.getStar())
-                .idReview(review.getIdReview())
-                .comment(review.getComment())
-                .idProduct(review.getProduct().getIdProduct())
-                .idUser(review.getUser().getIdUser())
-                .postedTime(review.getPostedTime())
-                .build();
+        ReviewResponse reviewResponse = reviewMapper.toReviewResponse(review);
         return ApiResponse.<ReviewResponse>builder().results(reviewResponse).build();
     }
 
     @Override
-    public PageableResponse getReviewByIdProduct(Integer idProduct, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public PageableResponse getReviewByIdProduct(Integer idProduct, Integer idUser, Pageable pageable) {
+        Specification<Review> hasIdProduct = ReviewSpecification.hasIdProduct(idProduct);
+        Specification<Review> hasIdUser = ReviewSpecification.hasIdUser(idUser);
+        Specification<Review> spec = hasIdUser.and(hasIdProduct);
 
-        Page<Review> listReviews = reviewRepository.findAllByIdProduct(idProduct, pageable);
+        Page<Review> listReviews = reviewRepository.findAll(spec, pageable);
         List<ReviewResponse> listReviewResponse = new ArrayList<>();
         for (Review review : listReviews.getContent()) {
-            ReviewResponse response = ReviewResponse
-                    .builder()
-                    .idReview(review.getIdReview())
-                    .star(review.getStar())
-                    .idProduct(review.getProduct().getIdProduct())
-                    .idUser(review.getUser().getIdUser())
-                    .postedTime(review.getPostedTime())
-                    .comment(review.getComment())
-                    .build();
+            ReviewResponse response = reviewMapper.toReviewResponse(review);
             listReviewResponse.add(response);
         }
 
@@ -114,28 +84,6 @@ public class ReviewService implements IReviewService {
                 .results(listReviewResponse)
                 .number(listReviews.getNumber())
                 .size(listReviews.getSize())
-                .build();
-    }
-
-    @Override
-    public ApiResponse<List<ReviewResponse>> getReviewByIdUser(Integer idUser) {
-        List<Review> listReviews = reviewRepository.findAllByIdUser(idUser);
-        List<ReviewResponse> listReviewResponse = new ArrayList<>();
-        for (Review review : listReviews) {
-            ReviewResponse response = ReviewResponse
-                    .builder()
-                    .idReview(review.getIdReview())
-                    .star(review.getStar())
-                    .idProduct(review.getProduct().getIdProduct())
-                    .idUser(review.getUser().getIdUser())
-                    .postedTime(review.getPostedTime())
-                    .comment(review.getComment())
-                    .build();
-            listReviewResponse.add(response);
-        }
-
-        return ApiResponse.<List<ReviewResponse>>builder()
-                .results(listReviewResponse)
                 .build();
     }
 }

@@ -1,10 +1,14 @@
 package com.example.FashionShop.Services;
 
 
-import com.example.FashionShop.Dto.response.RevenueResponse;
+import com.example.FashionShop.Dto.response.Revenue.Item;
+import com.example.FashionShop.Dto.response.Revenue.RevenueResponse;
+import com.example.FashionShop.Dto.response.Revenue.RevenueResponseItem;
 import com.example.FashionShop.Dto.response.SaleOrderResponse;
 import com.example.FashionShop.Entity.Card;
+import com.example.FashionShop.Enum.Day;
 import com.example.FashionShop.Enum.ErrorCode;
+import com.example.FashionShop.Enum.SalesOrderStatus;
 import com.example.FashionShop.Exception.AppException;
 import com.example.FashionShop.IServices.IRevenueService;
 import com.example.FashionShop.Repository.CardRepository;
@@ -22,9 +26,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.io.OutputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -41,7 +48,8 @@ public class RevenueService implements IRevenueService {
                                   String name,
                                   Integer idCategory,
                                   String status,
-                                  Integer idUser) {
+                                  Integer idUser,
+                                  String time) {
         List<SaleOrderResponse> listSaleOrderResponse = salesOrderService.getSaleOrdersBySpec(start, end, name, idCategory, status, idUser);
         Long totalOrder = (long) listSaleOrderResponse.size();
         float totalPrice = 0;
@@ -52,9 +60,165 @@ public class RevenueService implements IRevenueService {
                     .orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));
             totalPrice += card.getTotalPrice();
         }
+        List<RevenueResponseItem> revenueResponseItems = new ArrayList<>();
+        if(time.equals(Day.DAY.name()))
+        {
+            for (SalesOrderStatus salesOrderStatus : SalesOrderStatus.values()) {
+                String nameStatus = salesOrderStatus.name();
+                Map<String, Double> revenueByDay = new HashMap<>();
+                List<Item> items = new ArrayList<>();
+                int numRecord = 0;
+                for(SaleOrderResponse saleOrderResponse : listSaleOrderResponse)
+                {
+                    if(saleOrderResponse.getStatus().equals(nameStatus))
+                    {
+                        int date = 0;
+                        int month = 0;
+                        int year = 0;
+                        date = saleOrderResponse.getTimeCreated().getDayOfMonth();
+                        month = saleOrderResponse.getTimeCreated().getMonthValue();
+                        year = saleOrderResponse.getTimeCreated().getYear();
+                        if(saleOrderResponse.getTimeFinished() != null)
+                        {
+                             date = saleOrderResponse.getTimeFinished().getDayOfMonth();
+                             month = saleOrderResponse.getTimeFinished().getMonthValue();
+                             year = saleOrderResponse.getTimeFinished().getYear();
+                        }
+
+                        String key = String.format("%04d-%02d-%02d", year, month, date);
+                        Card card = cardRepository.findById(saleOrderResponse.getIdCard())
+                                .orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));
+                        float price = card.getTotalPrice();
+                        revenueByDay.put(key, revenueByDay.getOrDefault(key, 0.0) + price);
+                        numRecord ++;
+                    }
+                }
+                for (Map.Entry<String, Double> entry : revenueByDay.entrySet()) {
+                    Item item = new Item()
+                            .builder()
+                            .time(LocalDate.parse(entry.getKey()))
+                            .total(entry.getValue())
+                            .build();
+                    items.add(item);
+                }
+                RevenueResponseItem revenueResponseItem = new RevenueResponseItem()
+                        .builder()
+                        .numRecord(numRecord)
+                        .status(nameStatus)
+                        .items(items)
+                        .build();
+                if(revenueResponseItem.getItems().size() != 0)
+                {
+                    revenueResponseItems.add(revenueResponseItem);
+                }
+            }
+        }
+
+        if(time.equals(Day.MONTH.name()))
+        {
+            for (SalesOrderStatus salesOrderStatus : SalesOrderStatus.values()) {
+                String nameStatus = salesOrderStatus.name();
+                Map<String, Double> revenueByDay = new HashMap<>();
+                List<Item> items = new ArrayList<>();
+                int numRecord = 0;
+                for(SaleOrderResponse saleOrderResponse : listSaleOrderResponse)
+                {
+                    if(saleOrderResponse.getStatus().equals(nameStatus))
+                    {
+                        int date = 1;
+                        int month = 0;
+                        int year = 0;
+                        month = saleOrderResponse.getTimeCreated().getMonthValue();
+                        year = saleOrderResponse.getTimeCreated().getYear();
+                        if(saleOrderResponse.getTimeFinished() != null)
+                        {
+                            month = saleOrderResponse.getTimeFinished().getMonthValue();
+                            year = saleOrderResponse.getTimeFinished().getYear();
+                        }
+
+                        String key = String.format("%04d-%02d-%02d", year, month, date);
+                        Card card = cardRepository.findById(saleOrderResponse.getIdCard())
+                                .orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));
+                        float price = card.getTotalPrice();
+                        revenueByDay.put(key, revenueByDay.getOrDefault(key, 0.0) + price);
+                        numRecord ++;
+                    }
+                }
+                for (Map.Entry<String, Double> entry : revenueByDay.entrySet()) {
+                    Item item = new Item()
+                            .builder()
+                            .time(LocalDate.parse(entry.getKey()))
+                            .total(entry.getValue())
+                            .build();
+                    items.add(item);
+                }
+                RevenueResponseItem revenueResponseItem = new RevenueResponseItem()
+                        .builder()
+                        .numRecord(numRecord)
+                        .status(nameStatus)
+                        .items(items)
+                        .build();
+                if(revenueResponseItem.getItems().size() != 0)
+                {
+                    revenueResponseItems.add(revenueResponseItem);
+                }
+            }
+        }
+
+        if(time.equals(Day.YEAR.name()))
+        {
+            for (SalesOrderStatus salesOrderStatus : SalesOrderStatus.values()) {
+                String nameStatus = salesOrderStatus.name();
+                Map<String, Double> revenueByDay = new HashMap<>();
+                List<Item> items = new ArrayList<>();
+                int numRecord = 0;
+                for(SaleOrderResponse saleOrderResponse : listSaleOrderResponse)
+                {
+                    if(saleOrderResponse.getStatus().equals(nameStatus))
+                    {
+                        int date = 1;
+                        int month = 1;
+                        int year = 0;
+                        date = saleOrderResponse.getTimeCreated().getDayOfMonth();
+                        month = saleOrderResponse.getTimeCreated().getMonthValue();
+                        year = saleOrderResponse.getTimeCreated().getYear();
+                        if(saleOrderResponse.getTimeFinished() != null)
+                        {
+                            year = saleOrderResponse.getTimeFinished().getYear();
+                        }
+
+                        String key = String.format("%04d-%02d-%02d", year, month, date);
+                        Card card = cardRepository.findById(saleOrderResponse.getIdCard())
+                                .orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));
+                        float price = card.getTotalPrice();
+                        revenueByDay.put(key, revenueByDay.getOrDefault(key, 0.0) + price);
+                        numRecord ++;
+                    }
+                }
+                for (Map.Entry<String, Double> entry : revenueByDay.entrySet()) {
+                    Item item = new Item()
+                            .builder()
+                            .time(LocalDate.parse(entry.getKey()))
+                            .total(entry.getValue())
+                            .build();
+                    items.add(item);
+                }
+                RevenueResponseItem revenueResponseItem = new RevenueResponseItem()
+                        .builder()
+                        .numRecord(numRecord)
+                        .status(nameStatus)
+                        .items(items)
+                        .build();
+                if(revenueResponseItem.getItems().size() != 0)
+                {
+                    revenueResponseItems.add(revenueResponseItem);
+                }
+            }
+        }
         return RevenueResponse
                 .builder()
                 .orders(listSaleOrderResponse)
+                .data(revenueResponseItems)
                 .totalOrder(totalOrder)
                 .totalPrice(totalPrice)
                 .build();
@@ -68,7 +232,8 @@ public class RevenueService implements IRevenueService {
                            String name,
                            Integer idCategory,
                            String status,
-                           Integer idUser) throws java.io.IOException {
+                           Integer idUser,
+                           String time) throws java.io.IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Sales Orders");
             Row headerRow = sheet.createRow(0);
@@ -89,7 +254,7 @@ public class RevenueService implements IRevenueService {
                 cell.setCellValue(header.get(i));
             }
             // In Du Lieu
-            RevenueResponse revenueResponse = report(start, end, name, idCategory, status, idUser);
+            RevenueResponse revenueResponse = report(start, end, name, idCategory, status, idUser, time);
             long totalOrder = revenueResponse.getTotalOrder();
             float totalPrice = revenueResponse.getTotalPrice();
             List<SaleOrderResponse> listSaleOrderResponse = revenueResponse.getOrders();

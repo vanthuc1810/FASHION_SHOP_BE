@@ -18,4 +18,5 @@ public class SaleOrderResponse {
     String status;
     String paymentMethod;
     LocalDateTime timeFinished;
+    LocalDateTime timeCreated;
 }

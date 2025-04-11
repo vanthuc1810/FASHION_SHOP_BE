@@ -1,7 +1,6 @@
 package com.example.FashionShop.Controller;
 
-import com.example.FashionShop.Dto.response.ApiResponse;
-import com.example.FashionShop.Dto.response.RevenueResponse;
+import com.example.FashionShop.Dto.response.Revenue.RevenueResponse;
 import com.example.FashionShop.Services.RevenueService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
@@ -29,9 +28,11 @@ public class RevenueController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer idCategory,
             @RequestParam(required = false) Integer idUser,
-            @RequestParam(required = false) String status) {
-        return revenueService.report(start, end, name, idCategory, status, idUser);
-    }
+            @RequestParam(required = false, defaultValue = "DAY") String time,
+            @RequestParam(required = false) String status)
+            {
+                return revenueService.report(start, end, name, idCategory, status, idUser, time);
+            }
 
 
     @GetMapping("/export")
@@ -41,7 +42,8 @@ public class RevenueController {
                        @RequestParam(required = false) String name,
                        @RequestParam(required = false) Integer idCategory,
                        @RequestParam(required = false) Integer idUser,
+                       @RequestParam(required = false) String time,
                        @RequestParam(required = false) String status) throws IOException {
-        revenueService.exportPDF(response, start, end, name, idCategory, status, idUser);
+        revenueService.exportPDF(response, start, end, name, idCategory, status, idUser, time);
     }
 }

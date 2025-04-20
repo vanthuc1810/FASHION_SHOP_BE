@@ -37,30 +37,7 @@ public class AppInit {
                 userRepository.save(user);
                 log.warn("Admin has created");
             }
-            if (sizeRepository.findById("Small").isEmpty()) {
-                Size size = new Size()
-                        .builder()
-                        .nameSize("Small")
-                        .build();
-                sizeRepository.save(size);
-                log.warn("Small size has created");
-            }
-            if (sizeRepository.findById("Medium").isEmpty()) {
-                Size size = new Size()
-                        .builder()
-                        .nameSize("Medium")
-                        .build();
-                sizeRepository.save(size);
-                log.warn("Medium size has created");
-            }
-            if (sizeRepository.findById("Large").isEmpty()) {
-                Size size = new Size()
-                        .builder()
-                        .nameSize("Large")
-                        .build();
-                sizeRepository.save(size);
-                log.warn("Large size has created");
-            }
+
         };
     }
 

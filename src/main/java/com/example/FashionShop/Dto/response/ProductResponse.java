@@ -12,10 +12,10 @@ import java.util.List;
 @Builder
 public class ProductResponse {
     Integer idProduct;
-    String description;
+    String seriProduct;
+    String images;
     String manufacturer;
     String name;
-    String images;
     int discount;
     double price;
     boolean deleted;

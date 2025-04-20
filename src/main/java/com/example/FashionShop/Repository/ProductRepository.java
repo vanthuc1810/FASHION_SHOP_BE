@@ -56,4 +56,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
 
     @Query(value = "SELECT DISTINCT manufacturer from product", nativeQuery = true)
     List<String> getAllManufacturer();
+
 }

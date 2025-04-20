@@ -59,7 +59,6 @@ public class CardService implements ICardService {
         cardRepository.save(card);
         for (CardItemCreationRequest cardItemCreationRequest : requests) {
             CardItem cardItem = cardItemService.createCardItem(cardItemCreationRequest, card.getIdCard());
-            cardItemRepository.save(cardItem);
             total_price += cardItem.getPrice() * cardItem.getQuantity();
         }
         card.setTotalPrice(total_price);

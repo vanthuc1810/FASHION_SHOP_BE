@@ -24,6 +24,10 @@ public class ProductController {
     public PageableResponse getAllProducts(Pageable pageable) {
         return productService.getAllProducts(pageable);
     }
+    @GetMapping("/manufacturer")
+    public ApiResponse getManufracture() {
+        return productService.getManufracture();
+    }
 
     @GetMapping("/{idProduct}")
     public ApiResponse getProductById(@PathVariable("idProduct") Integer idProduct) {
@@ -36,8 +40,8 @@ public class ProductController {
     }
 
     @PostMapping("/filterProduct")
-    public PageableResponse filterProducts(@RequestBody @Valid FilterProductRequest request, Pageable pageable) {
-        return productService.filterProducts(request, pageable);
+    public PageableResponse filterProducts(@RequestParam String query, @RequestBody @Valid FilterProductRequest request, Pageable pageable) {
+        return productService.filterProducts(query, request, pageable);
     }
 
     @PostMapping("/create")
@@ -61,9 +65,9 @@ public class ProductController {
         return productService.addSizeToProduct(request);
     }
 
-    @DeleteMapping("/delete/{idProduct}")
-    public ApiResponse deleteProductById(@PathVariable("idProduct") Integer idProduct) {
-        return productService.deleteProductById(idProduct);
+    @PutMapping("/delete")
+    public ApiResponse deleteProductById(@RequestBody DeleteProductRequest request) {
+         return productService.deleteProduct(request);
     }
 
 }

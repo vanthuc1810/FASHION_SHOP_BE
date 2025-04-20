@@ -18,7 +18,8 @@ import lombok.experimental.FieldDefaults;
 public class FilterProductRequest {
     List<String> sizes = new ArrayList<>();
     List<String> colors = new ArrayList<>();
+    List<Integer> idCategorys = new ArrayList<>();
+    List<String> manufacturers = new ArrayList<>();
     List<Long> prices = Arrays.asList((long)0, (long)999999999);
-    String manufacturer = "";
-    int idCategory = 0;
+    boolean isDeleted = false;
 }

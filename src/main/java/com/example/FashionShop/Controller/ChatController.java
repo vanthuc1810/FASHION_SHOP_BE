@@ -8,6 +8,7 @@ import com.example.FashionShop.Dto.response.MessageImgResponse;
 import com.example.FashionShop.Dto.response.MessageResponse;
 import com.example.FashionShop.Entity.User;
 import com.example.FashionShop.Enum.ErrorCode;
+import com.example.FashionShop.Enum.Role;
 import com.example.FashionShop.Exception.AppException;
 import com.example.FashionShop.Repository.UserRepository;
 import com.example.FashionShop.Services.ChatService;
@@ -22,7 +23,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,9 +45,9 @@ public class ChatController {
     public void greating(@Payload GreetingRequest greetingRequest) throws Exception {
         Thread.sleep(1000); // simulated delay
         User user = userRepository.findById(Integer.parseInt(greetingRequest.getSenderID())).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
-        if(!user.getRole().equals("ADMIN"))
+        if(!user.getRole().equals(Role.CHAT.name()))
         {
-            List<User> listAdmin = userRepository.findAllByRole("ADMIN");
+            List<User> listAdmin = userRepository.findAllByRole(Role.CHAT.name());
             for (User u : listAdmin) {
                 if (u.isAvaialbe()) {
                     MessageResponse messageResponse = MessageResponse

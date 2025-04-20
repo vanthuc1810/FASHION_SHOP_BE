@@ -21,5 +21,7 @@ public interface CardItemMapper {
     @Mapping(target = "price", expression = "java(product.getPrice() * (1 - (double) product.getDiscount() / 100))")
     @Mapping(target = "product", source = "product")
     @Mapping(target = "card", source = "card")
+    @Mapping(target = "quantity", source = "request.quantity")
+
     CardItem toCardItem(CardItemCreationRequest request, Product product, Card card);
 }

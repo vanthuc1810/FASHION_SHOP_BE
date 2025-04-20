@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
@@ -35,4 +37,14 @@ public class ProductCreationRequest {
     double price;
     @Size(min = 2, max = 4, message = "UNITSTOCK_INVALID")
     String unitStock;
+
+    @Min(value = 1, message = "DISCOUNT_INVALID")
+    Integer quantity;
+
+    @NotEmpty(message = "COLOR_NOT_EMPTY")
+    List<String> colors;
+
+    @NotEmpty(message = "SIZE_NOT_EMPTY")
+    List<String> sizes;
+
 }

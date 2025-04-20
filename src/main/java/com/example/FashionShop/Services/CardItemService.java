@@ -35,10 +35,16 @@ public class CardItemService {
         Product product = productRepository
                 .findById(request.getIdProduct())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOTFOUND));
+        if(request.getQuantity() > product.getQuantity())
+        {
+            throw new AppException(ErrorCode.QUANTITY_INVALID);
+        }
         Card card = cardRepository.findById(idCard).orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));
-
+        Integer newQuantity = product.getQuantity() - request.getQuantity();
+        product.setQuantity(newQuantity);
         CardItem cardItem = cardItemMapper.toCardItem(request, product, card);
         cardItemRepository.save(cardItem);
+        productRepository.save(product);
         return cardItem;
     }
     public ApiResponse getCardItemById(Integer idCardItem)

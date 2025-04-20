@@ -10,6 +10,6 @@ import com.example.FashionShop.Entity.Color;
 
 @Repository
 public interface ColorRepository extends JpaRepository<Color, String> {
-    @Query(value = "SELECT DISTINCT color_id FROM color_product", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT name_color FROM color", nativeQuery = true)
     List<String> findAllColor();
 }

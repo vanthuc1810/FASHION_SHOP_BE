@@ -1,8 +1,10 @@
 package com.example.FashionShop.Services;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.example.FashionShop.Dto.response.ProductResponse;
 import com.example.FashionShop.Entity.*;
@@ -12,6 +14,7 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.example.FashionShop.Dto.request.*;
@@ -28,6 +31,7 @@ import com.example.FashionShop.Repository.SizeRepository;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Builder
@@ -41,24 +45,94 @@ public class ProductService implements IProductService{
     SizeRepository sizeRepository;
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse createProduct(ProductCreationRequest request) {
         Category category = categoryRepository
                 .findById(request.getIdCategory())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOTFOUND));
 
         Product product = productMapper.toProduct(request, category);
+        String seri = "FAS_" + getInitials(category.getName());
+        product.setSeriProduct(seri);
+        Product myProduct = productRepository.save(product);
+
+        seri += String.format("%05d", myProduct.getIdProduct());
+        myProduct.setSeriProduct(seri);
+        productRepository.save(myProduct);
+
+        List<ColorProduct> colorProducts = new ArrayList<>();
+        List<SizeProduct> sizeProducts = new ArrayList<>();
+
+        for (String nameColor : request.getColors())
+        {
+            Color color = colorRepository.findById(nameColor).orElseGet(() -> {
+                // Nếu không tìm thấy màu sắc, tạo mới
+                Color newColor = new Color();
+                newColor.setNameColor(nameColor);
+                return colorRepository.save(newColor); // Lưu màu sắc mới vào database
+            });
+            ColorProduct colorProduct = new ColorProduct()
+                    .builder()
+                    .product(product)
+                    .color(color)
+                    .build();
+            colorProducts.add(colorProduct);
+        }
+
+        for (String nameSize : request.getSizes())
+        {
+            Size size = sizeRepository.findById(nameSize).orElseGet(() -> {
+                // Nếu không tìm thấy màu sắc, tạo mới
+                Size newSize = new Size();
+                newSize.setNameSize(nameSize);
+                return sizeRepository.save(newSize); // Lưu màu sắc mới vào database
+            });
+            SizeProduct sizeProduct = new SizeProduct()
+                    .builder()
+                    .product(product)
+                    .size(size)
+                    .build();
+            sizeProducts.add(sizeProduct);
+        }
+
+        product.setSizeProducts(sizeProducts);
+        product.setColorProducts(colorProducts);
         productRepository.save(product);
         return new ApiResponse().builder().results(product).build();
     }
+    public static String removeVietnameseTones(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        normalized = pattern.matcher(normalized).replaceAll("");
+        return normalized.replaceAll("đ", "d").replaceAll("Đ", "D");
+    }
 
+    // Lấy ký tự đầu tiên mỗi từ sau khi đã bỏ dấu
+    public static String getInitials(String input) {
+        if (input == null || input.isEmpty()) return "";
+
+        // Bỏ dấu trước
+        input = removeVietnameseTones(input);
+
+        String[] words = input.trim().split("\\s+");
+        StringBuilder initials = new StringBuilder();
+
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                initials.append(word.charAt(0));
+            }
+        }
+
+        return initials.toString().toUpperCase();
+    }
     @Override
+    @Transactional
     public ApiResponse addColorToProduct(ColorCreationRequest request) {
         Product product = productRepository
                 .findById(request.getIdProduct())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOTFOUND));
         // 2. Tìm hoặc tạo mới màu sắc theo nameColor
-        List<ColorProduct> productColors = null; // Lấy danh sách màu của sản phẩm
-        productColors = product.getColorProducts();
+        List<ColorProduct> productColors = new ArrayList<>(); // Lấy danh sách màu của sản phẩm
 
         for (String nameColor : request.getColors()) {
             Color color = colorRepository.findById(nameColor).orElseGet(() -> {
@@ -72,12 +146,9 @@ public class ProductService implements IProductService{
                     .product(product)
                     .color(color)
                     .build();
-
-            if (!productColors.contains(colorProduct)) {
-                productColors.add(colorProduct);
-                product.setColorProducts(productColors); // Cập nhật danh sách màu cho sản phẩm
-            }
+            productColors.add(colorProduct);
         }
+        product.setColorProducts(productColors); // Cập nhật danh sách màu cho sản phẩm
 
         // 3. Luu san pham
         productRepository.save(product);
@@ -86,41 +157,51 @@ public class ProductService implements IProductService{
     }
 
     @Override
+    @Transactional
     public ApiResponse addSizeToProduct(SizeCreationRequest request) {
-//         GET PRODUCT BY ID
         Product product = productRepository
                 .findById(request.getIdProduct())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOTFOUND));
+        // 2. Tìm hoặc tạo mới màu sắc theo nameColor
+        List<SizeProduct> sizeProducts = new ArrayList<>(); // Lấy danh sách màu của sản phẩm
 
-        // Tim hoac tao moi Size roi add vao list size trong product
-        List<SizeProduct> listSizeProduct = product.getSizeProducts();
         for (String nameSize : request.getSizes()) {
             Size size = sizeRepository.findById(nameSize).orElseGet(() -> {
-                Size newSize = new Size().builder().nameSize(nameSize).build();
-                return sizeRepository.save(newSize);
+                // Nếu không tìm thấy màu sắc, tạo mới
+                Size newSize = new Size();
+                newSize.setNameSize(nameSize);
+                return sizeRepository.save(newSize); // Lưu màu sắc mới vào database
             });
-            SizeProduct sizeProduct = SizeProduct
+            SizeProduct sizeProduct = new SizeProduct()
                     .builder()
                     .product(product)
                     .size(size)
                     .build();
-            if (!listSizeProduct.contains(sizeProduct)) {
-                listSizeProduct.add(sizeProduct);
-                product.setSizeProducts(listSizeProduct);
-            }
+            sizeProducts.add(sizeProduct);
         }
+        product.setSizeProducts(sizeProducts); // Cập nhật danh sách màu cho sản phẩm
+
+        // 3. Luu san pham
         productRepository.save(product);
+
         return new ApiResponse().builder().results(product).build();
     }
 
     @Override
     public PageableResponse getAllProducts(Pageable pageable) {
-        Page pageOrigin = productRepository.findAll(pageable);
-
+        Specification<Product> spec = Specification.where(ProductSpecification.hasDeleted(false));
+        Page<Product> pageOrigin = productRepository.findAll(spec, pageable);
+        List<Product> listProduct = pageOrigin.getContent();
+        List<ProductResponse> productResponseList = new ArrayList<>();
+        for (Product product : listProduct)
+        {
+            ProductResponse productResponse = productMapper.toProductResponse(product);
+            productResponseList.add(productResponse);
+        }
         // set dl vao dto response
         PageableResponse pageableResponse = new PageableResponse()
                 .builder()
-                .results(pageOrigin.getContent())
+                .results(productResponseList)
                 .size(pageOrigin.getSize())
                 .totalElements(pageOrigin.getTotalElements())
                 .totalPages(pageOrigin.getTotalPages())
@@ -133,6 +214,9 @@ public class ProductService implements IProductService{
     @Override
     public ApiResponse getProductById(Integer idProduct) {
         Product product = productRepository.findById(idProduct).orElseThrow(() -> new AppException());
+        if(product.isDeleted()){
+            throw new AppException(ErrorCode.PRODUCT_NOTFOUND);
+        }
         ProductResponse productResponse = productMapper.toProductResponse(product);
         return new ApiResponse().builder().results(productResponse).build();
     }
@@ -147,39 +231,65 @@ public class ProductService implements IProductService{
     public ApiResponse updateProductById(Integer idProduct, UpdateProductRequest request) {
         Product product =
                 productRepository.findById(idProduct).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOTFOUND));
-//        product = productMapper.toUpdateProduct(product, request);
+        product = productMapper.toUpdateProduct(product, request);
         productRepository.save(product);
         return new ApiResponse().builder().results(product).build();
     }
 
     @Override
-    public ApiResponse deleteProductById(Integer idProduct) {
-        Product product = productRepository.findById(idProduct).orElseThrow(() -> new AppException());
-        product.setDeleted(true);
-        productRepository.delete(product);
-        return new ApiResponse().builder().results(product).build();
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse deleteProduct(DeleteProductRequest request) {
+        List<Integer> idProducts = request.getIdProducts();
+
+        List<Product> products = productRepository.findAllById(idProducts);
+
+        if (products.size() != idProducts.size()) {
+            throw new AppException(ErrorCode.PRODUCT_NOTFOUND);
+        }
+
+        products.forEach(product -> product.setDeleted(true));
+        productRepository.saveAll(products);
+        return ApiResponse
+                .builder()
+                .code(200)
+                .message("Xóa sản pẩm thành công!!!")
+                .build();
     }
 
     @Override
-    public PageableResponse filterProducts(FilterProductRequest request, Pageable pageable) {
+    public PageableResponse filterProducts(String query, FilterProductRequest request, Pageable pageable) {
         Long minPrice = request.getPrices().get(0);
         Long maxPrice = request.getPrices().get(1);
-        String manufacturer = request.getManufacturer();
-        int idCategory = request.getIdCategory();
+        List<String> manufacturers = request.getManufacturers();
+        List<Integer> idCategorys = request.getIdCategorys();
         List<String> colors = request.getColors();
         List<String> sizes = request.getSizes();
-        
+        boolean isDeleted = request.isDeleted();
         // filter Manufacturer - Price - Colors - Size - Category
-        Specification<Product> spec = Specification.where(ProductSpecification.hasManufacturer(manufacturer))
+        Specification<Product> spec = Specification.where(ProductSpecification.hasManufacturer(manufacturers))
                 .and(ProductSpecification.hasColors(colors))
                 .and(ProductSpecification.hasSizes(sizes))
                 .and(ProductSpecification.hasPriceInRange(minPrice,maxPrice))
-                .and(ProductSpecification.hasIdCategory(idCategory));
+                .and(ProductSpecification.hasIdCategory(idCategorys))
+                .and(ProductSpecification.hasDeleted(isDeleted));
 
+        if (query != null && !query.trim().isEmpty()) {
+            String[] words = query.trim().split("\\s+");
+            for (String word : words) {
+                spec = spec.and(ProductSpecification.nameContains(word));
+            }
+        }
         Page<Product> pageOrigin = productRepository.findAll(spec,pageable);
+        List<Product> productList = pageOrigin.getContent();
+        List<ProductResponse> productResponseList = new ArrayList<>();
+        for(Product product : productList)
+        {
+            ProductResponse productResponse = productMapper.toProductResponse(product);
+            productResponseList.add(productResponse);
+        }
         return PageableResponse
                 .builder()
-                .results(pageOrigin.getContent())
+                .results(productResponseList)
                 .size(pageOrigin.getSize())
                 .totalElements(pageOrigin.getTotalElements())
                 .totalPages(pageOrigin.getTotalPages())
@@ -190,11 +300,11 @@ public class ProductService implements IProductService{
     @Override
     public PageableResponse searchProducts(String keyword, Pageable pageable) {
         Specification<Product> spec = Specification.where(null);
-
         if (keyword != null && !keyword.trim().isEmpty()) {
-            spec = Specification.where(ProductSpecification
-                    .hasName(keyword))
-                    .or(ProductSpecification.hasDescription(keyword));
+            String[] words = keyword.trim().split("\\s+");
+            for (String word : words) {
+                spec = spec.and(ProductSpecification.nameContains(word));
+            }
         }
 
         Page<Product> listProducts = productRepository.findAll(spec, pageable);
@@ -204,6 +314,16 @@ public class ProductService implements IProductService{
                 .totalElements(listProducts.getTotalElements())
                 .totalPages(listProducts.getTotalPages())
                 .number(listProducts.getNumber())
+                .build();
+    }
+
+    @Override
+    public ApiResponse getManufracture() {
+        List<String> manufractureList = productRepository.getAllManufacturer();
+        return ApiResponse
+                .builder()
+                .code(200)
+                .results(manufractureList)
                 .build();
     }
 }

@@ -14,24 +14,38 @@ public class ProductSpecification {
             criteriaBuilder.like(root.get("name"), "%" + name + "%");
     }
 
+    public static Specification<Product> nameContains(String keyword) {
+        return (root, query, builder) ->
+                builder.like(builder.lower(root.get("name")), "%" + keyword.toLowerCase() + "%");
+    }
+
     public static Specification<Product> hasDescription(String description) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.like(root.get("name"), "%" + description + "%");
     }
 
-    public static Specification<Product> hasIdCategory(int idCategory){
+    public static Specification<Product> hasIdCategory(List<Integer> idCategorys){
         return (root, query, criteriaBuilder) ->
         {
-            if(idCategory == 0)
+            if (idCategorys == null || idCategorys.isEmpty()) {
             {
                 return criteriaBuilder.conjunction();
+            }
             }else {
                 // Join bang
                 Join<Product, Category> categoryJoin = root.join("category", JoinType.INNER);
                 // Tao cac dieu kien
-                Predicate hasIdCategory = criteriaBuilder.equal(categoryJoin.get("idCategory"), idCategory);
+                Predicate hasIdCategory = categoryJoin.get("idCategory").in(idCategorys);
                 return hasIdCategory;
             }
+        };
+    }
+
+    public static Specification<Product> hasDeleted(boolean delete){
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate hasDeleted = criteriaBuilder.equal(root.get("deleted"), delete);
+            return hasDeleted;
         };
     }
 
@@ -49,16 +63,23 @@ public class ProductSpecification {
         };
     }
 
-    public static Specification<Product> hasManufacturer(String nameManuFacturer) {
+    public static Specification<Product> hasManufacturer(List<String> nameManuFacturer) {
         return (root, query, criteriaBuilder) -> {
             if (nameManuFacturer.isEmpty() || nameManuFacturer == null)
             {
                 return criteriaBuilder.conjunction(); // Không thêm điều kiện
             }else {
                 // Tao cac dieu kien
-                Predicate hasManufacturer = criteriaBuilder.equal(root.get("manufacturer"), nameManuFacturer);
+                Predicate hasManufacturer = root.get("manufacturer").in(nameManuFacturer);
                 return hasManufacturer;
             }
+        };
+    }
+
+    public static Specification<Product> findManufracture() {
+        return (root, query, criteriaBuilder) -> {
+            query.distinct(true);
+            return criteriaBuilder.isNotNull(root.get("manufacturer"));
         };
     }
 

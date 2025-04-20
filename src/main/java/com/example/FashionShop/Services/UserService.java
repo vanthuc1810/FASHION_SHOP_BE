@@ -1,11 +1,13 @@
 package com.example.FashionShop.Services;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import com.example.FashionShop.Dto.request.TopUpWalletRequest;
 import com.example.FashionShop.Entity.ShippingAddress;
 import com.example.FashionShop.Entity.Transaction;
+import com.example.FashionShop.Enum.Role;
 import com.example.FashionShop.Repository.ShippingAddressRepository;
 import com.example.FashionShop.Repository.TransactionRepository;
 import jakarta.transaction.Transactional;
@@ -102,6 +104,7 @@ public class UserService implements IUserSerive {
         shippingAddress.setDefaultAddress(true);
         shippingAddress.setAddress(request.getAddress());
         shippingAddress.setUser(user);
+        user.setRole(Role.USER.name());
         user = userRepository.save(user);
         shippingAddressRepository.save(shippingAddress);
         return new ApiResponse<>().builder().results(user).build();

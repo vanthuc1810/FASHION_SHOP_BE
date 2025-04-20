@@ -31,6 +31,7 @@ public interface ProductMapper {
         @Mapping(source = "request.discount", target = "discount")
         @Mapping(source = "request.price", target = "price")
         @Mapping(source = "request.unitStock", target = "unitStock")
+        @Mapping(source = "request.quantity", target = "quantity")
         @Mapping(source = "category", target = "category")
         public Product toProduct(ProductCreationRequest request, Category category);
 

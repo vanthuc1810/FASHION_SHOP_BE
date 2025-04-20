@@ -1,18 +1,17 @@
 package com.example.FashionShop.Dto.request;
 
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryCreationRequest {
-    @Size(min = 2, max = 20, message = "SIZE_CATEGORY_INVALID")
-    String name;
+public class DeleteProductRequest {
+    List<Integer> idProducts;
 }

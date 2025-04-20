@@ -2,6 +2,7 @@ package com.example.FashionShop.Entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.*;
 

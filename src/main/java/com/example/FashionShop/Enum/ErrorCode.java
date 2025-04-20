@@ -54,6 +54,7 @@ public enum ErrorCode {
     START_DATE_MUST_BE_BEFORE_EXPIRATION_DATE(1039, "Start date phải trước ngày hết hạn", HttpStatus.BAD_REQUEST),
     MIN_ORDER_VALUE_INVALID(1039, "Giá trị đơn hàng tối thiểu phải >= 0", HttpStatus.BAD_REQUEST),
     DISCOUNT_AMOUNT_INVALID(1039, "Giá tiền discount phải >= 0", HttpStatus.BAD_REQUEST),
+    QUANTITY_INVALID(1040, "Số lượng sản phẩm không hợp lệ", HttpStatus.BAD_REQUEST),
 
     ;
 

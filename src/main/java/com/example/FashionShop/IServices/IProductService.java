@@ -21,9 +21,12 @@ public interface IProductService {
 
     public ApiResponse updateProductById(Integer idProduct, UpdateProductRequest request);
 
-    public ApiResponse deleteProductById(Integer idProduct);
+    public ApiResponse deleteProduct(DeleteProductRequest request);
 
-    public PageableResponse filterProducts(FilterProductRequest request, Pageable pageable);
+    public PageableResponse filterProducts(String query, FilterProductRequest request, Pageable pageable);
 
     public PageableResponse searchProducts(String query, Pageable pageable);
+
+    public ApiResponse getManufracture();
+
 }

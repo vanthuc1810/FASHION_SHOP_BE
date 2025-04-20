@@ -23,11 +23,10 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer idProduct;
-
+    Integer quantity;
+    String seriProduct;
     String description;
-
     String manufacturer;
-
     String name;
     String images;
     int discount;

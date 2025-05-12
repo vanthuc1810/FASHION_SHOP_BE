@@ -6,6 +6,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Optional;
 
+import com.example.FashionShop.Dto.request.EmailSenderRequest;
+import com.example.FashionShop.Dto.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,6 +38,7 @@ import lombok.experimental.NonFinal;
 @RequiredArgsConstructor
 public class AuthenticationService implements IAuthenticationService {
     UserRepository userRepository;
+    EmailService emailService;
 
     @NonFinal
     @Value("${jwt.secret}")
@@ -48,7 +51,7 @@ public class AuthenticationService implements IAuthenticationService {
         var context = SecurityContextHolder.getContext();
         Integer idUser = Integer.parseInt(context.getAuthentication().getName());
         User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
-        user.setAvaialbe(false);
+        user.setAvailable(false);
         userRepository.save(user);
     }
 
@@ -62,7 +65,11 @@ public class AuthenticationService implements IAuthenticationService {
         if (!authenticated) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-        user.setAvaialbe(true);
+        if(user.isDeleted())
+        {
+            throw new AppException(ErrorCode.UN_ACTIVE_ACCOUNT);
+        }
+        user.setAvailable(true);
         userRepository.save(user);
         var token = genToken(request.getUserName());
         AuthenticationResponse authenticationRespone = new AuthenticationResponse()
@@ -80,7 +87,7 @@ public class AuthenticationService implements IAuthenticationService {
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.get().getIdUser().toString())
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.DAYS).toEpochMilli()))
                 .claim("scope", user.get().getRole())
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -151,5 +158,14 @@ public class AuthenticationService implements IAuthenticationService {
                 .token(request.getToken())
                 .authenticated(false)
                 .build();
+    }
+
+    @Override
+    public ApiResponse forgotPassword(EmailSenderRequest request) {
+        User user = userRepository.findByEmail(request.getTo()).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+        if(user.isVerifyed()){
+
+        }
+        return null;
     }
 }

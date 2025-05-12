@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class SaleOrderSpecification {
     public static Specification<SalesOrder> hasTimeBetween(LocalDateTime start, LocalDateTime end) {
@@ -80,5 +81,60 @@ public class SaleOrderSpecification {
         };
     }
 
+    public static Specification<SalesOrder> hasStatusList(List<String> status) {
+        return (root, query, criteriaBuilder) ->
+        {
+            if(status.size() == 0)
+            {
+                return criteriaBuilder.conjunction();
+            }else
+            {
+                Predicate hasStatusList = root.get("status").in(status);
+                return hasStatusList;
+            }
+        };
+    }
+
+    public static Specification<SalesOrder> hasPaymentMethodList(List<String> paymentMethods) {
+        return (root, query, criteriaBuilder) ->
+        {
+            if(paymentMethods.size() == 0)
+            {
+                return criteriaBuilder.conjunction();
+            }else
+            {
+                Predicate hasPaymentMethodList = root.get("paymentMethod").in(paymentMethods);
+                return hasPaymentMethodList;
+            }
+        };
+    }
+
+    public static Specification<SalesOrder> hasMinTotalAmount(Double minAmount) {
+        return (root, query, criteriaBuilder) -> {
+            if(minAmount == null)
+            {
+                return criteriaBuilder.conjunction();
+            }else
+            {
+                Join<SalesOrder, Card> cardJoin = root.join("card", JoinType.INNER);
+                return criteriaBuilder.greaterThanOrEqualTo(cardJoin.get("totalPrice"), minAmount);
+            }
+        };
+    }
+
+
+    public static Specification<SalesOrder> hasMaxTotalAmount(Double maxAmount) {
+        return (root, query, criteriaBuilder) -> {
+            System.out.println("Max amount = " + maxAmount);
+            if(maxAmount == null)
+            {
+                return criteriaBuilder.conjunction();
+            }else
+            {
+                Join<SalesOrder, Card> cardJoin = root.join("card", JoinType.INNER);
+                return criteriaBuilder.lessThanOrEqualTo(cardJoin.get("totalPrice"), maxAmount);
+            }
+        };
+    }
 
 }

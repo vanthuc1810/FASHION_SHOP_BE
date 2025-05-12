@@ -37,6 +37,7 @@ public class SecurityConfig {
         "/review",
         "/review/**",
         "/product",
+        "/product/recomment",
         "/user/getUser/*",
         "/user/create",
         "/color",
@@ -47,7 +48,8 @@ public class SecurityConfig {
         "/checkPaymentLink",
         "/recieveWebhook",
         "/transaction/walletWebhook",
-        "/ws"
+        "/ws",
+        "/auth/forgot-password"
     };
 
     @Bean

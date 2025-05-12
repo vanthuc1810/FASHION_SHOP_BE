@@ -18,15 +18,15 @@ public class ProductCreationRequest {
     String description;
     @Size(min = 0, max = 20, message = "SIZE_MANUFACTURER_INVALID")
     @Pattern(
-            regexp = "^[A-Z][^\\d]+$",
-            message = "MANUFRACTURER_INVALID"
+            regexp = "^[\\p{L}0-9][\\p{L}\\p{M}0-9 '\\-_/&.]{1,98}[\\p{L}0-9]$",
+            message = "NAME_PRODUCT_INVALID"
     )
     String manufacturer;
     @NotBlank
     String images;
-    @Size(min = 0, max = 20, message = "SIZE_NAME_INVALID")
+    @Size(min = 0, max = 100, message = "SIZE_NAME_INVALID")
     @Pattern(
-            regexp = "^[A-Z][^\\d]+$",
+            regexp = "^[\\p{L}0-9][\\p{L}\\p{M}0-9 '\\-_/&.]{1,98}[\\p{L}0-9]$",
             message = "NAME_PRODUCT_INVALID"
     )
     String name;

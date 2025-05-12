@@ -19,4 +19,6 @@ public class SaleOrderResponse {
     String paymentMethod;
     LocalDateTime timeFinished;
     LocalDateTime timeCreated;
+    double total;
+    String address;
 }

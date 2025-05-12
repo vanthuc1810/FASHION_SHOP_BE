@@ -1,21 +1,15 @@
 package com.example.FashionShop.Dto.response;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class ReviewResponse {
-    Integer idReview;
-    String comment;
-    int star;
-    LocalDate postedTime;
-    Integer idUser;
-    Integer idProduct;
+public class RecommentResponse {
+    List<Integer> suggested_products;
 }

@@ -3,7 +3,9 @@ package com.example.FashionShop.IServices;
 import java.text.ParseException;
 
 import com.example.FashionShop.Dto.request.AuthenticationRequest;
+import com.example.FashionShop.Dto.request.EmailSenderRequest;
 import com.example.FashionShop.Dto.request.IntrospectRequest;
+import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Dto.response.AuthenticationResponse;
 import com.example.FashionShop.Dto.response.IntrospectResponse;
 import com.nimbusds.jose.JOSEException;
@@ -19,4 +21,7 @@ public interface IAuthenticationService {
     SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException;
 
     AuthenticationResponse refreshToken(IntrospectRequest request) throws ParseException, JOSEException;
+
+    ApiResponse forgotPassword(EmailSenderRequest request);
+
 }

@@ -41,18 +41,33 @@ public class ProductSpecification {
         };
     }
 
-    public static Specification<Product> hasDeleted(boolean delete){
+    public static Specification<Product> hasIdProduct(List<Integer> idProducts){
         return (root, query, criteriaBuilder) ->
         {
-            Predicate hasDeleted = criteriaBuilder.equal(root.get("deleted"), delete);
+            if (idProducts == null || idProducts.isEmpty()) {
+                {
+                    return criteriaBuilder.conjunction();
+                }
+            }else {
+                // Tao cac dieu kien
+                Predicate hasIdProduct = root.get("idProduct").in(idProducts);
+                return hasIdProduct;
+            }
+        };
+    }
+
+    public static Specification<Product> hasDeleted(List<Boolean> delete){
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate hasDeleted = root.get("deleted").in(delete);
             return hasDeleted;
         };
     }
 
-    public static Specification<Product> hasPriceInRange(Long minPrice, Long maxPrice) {
+    public static Specification<Product> hasPriceInRange(double minPrice, double maxPrice) {
         return (root, query, criteriaBuilder) ->
         {
-            if (minPrice < maxPrice)
+            if (minPrice >= maxPrice)
             {
                 return criteriaBuilder.conjunction(); // Không thêm điều kiện
             }else {
@@ -65,11 +80,13 @@ public class ProductSpecification {
 
     public static Specification<Product> hasManufacturer(List<String> nameManuFacturer) {
         return (root, query, criteriaBuilder) -> {
-            if (nameManuFacturer.isEmpty() || nameManuFacturer == null)
-            {
-                return criteriaBuilder.conjunction(); // Không thêm điều kiện
-            }else {
-                // Tao cac dieu kien
+            // Kiểm tra nếu list là null hoặc rỗng
+            if (nameManuFacturer == null || nameManuFacturer.isEmpty()) {
+                System.out.println("Khong co");
+                return criteriaBuilder.conjunction(); // Không thêm điều kiện nếu danh sách trống hoặc null
+            } else {
+                // Tạo điều kiện kiểm tra manufacturer trong danh sách
+                System.out.println(nameManuFacturer.get(0));
                 Predicate hasManufacturer = root.get("manufacturer").in(nameManuFacturer);
                 return hasManufacturer;
             }

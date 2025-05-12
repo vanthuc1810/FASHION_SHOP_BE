@@ -1,5 +1,7 @@
 package com.example.FashionShop.Controller;
 
+import com.example.FashionShop.Dto.request.ActiveCategoryRequest;
+import com.example.FashionShop.Dto.request.DeleteCategoryRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,9 +26,14 @@ public class CategoryController {
         return categoryService.createCategory(request);
     }
 
-    @DeleteMapping("/delete/{idCategory}")
-    public ApiResponse deleteCategory(@PathVariable("idCategory") Integer idCategory) {
-        return categoryService.deleteCategoryById(idCategory);
+    @PutMapping("/delete")
+    public ApiResponse deleteCategory(@RequestBody DeleteCategoryRequest request) {
+        return categoryService.deleteCategoryById(request);
+    }
+
+    @PutMapping("/active")
+    public ApiResponse activeCategory(@RequestBody ActiveCategoryRequest request) {
+        return categoryService.activeCategory(request);
     }
 
     @GetMapping()

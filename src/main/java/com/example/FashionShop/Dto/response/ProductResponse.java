@@ -18,8 +18,10 @@ public class ProductResponse {
     String name;
     int discount;
     double price;
+    Integer quantity;
     boolean deleted;
     String unitStock;
     List<String> colors;
     List<String> sizes;
+    Integer idCategory;
 }

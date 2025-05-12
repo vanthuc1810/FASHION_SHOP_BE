@@ -3,17 +3,19 @@ package com.example.FashionShop.Controller;
 import java.nio.file.AccessDeniedException;
 import java.text.ParseException;
 
-import com.example.FashionShop.Dto.request.RefreshRequest;
+import com.cloudinary.Api;
+import com.example.FashionShop.Dto.request.*;
 import com.example.FashionShop.Entity.User;
 import com.example.FashionShop.Enum.ErrorCode;
 import com.example.FashionShop.Exception.AppException;
 import com.example.FashionShop.Repository.UserRepository;
+import com.example.FashionShop.Services.EmailService;
+import com.example.FashionShop.Services.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.FashionShop.Dto.request.AuthenticationRequest;
-import com.example.FashionShop.Dto.request.IntrospectRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Dto.response.AuthenticationResponse;
 import com.example.FashionShop.Dto.response.IntrospectResponse;
@@ -30,6 +32,8 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 public class AuthenticationController {
     AuthenticationService authenticationService;
+    EmailService emailService;
+    UserService userService;
 
     @PostMapping("/login")
     public ApiResponse<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest authenticationRequest) throws AccessDeniedException {
@@ -57,6 +61,16 @@ public class AuthenticationController {
     public AuthenticationResponse refreshToken(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
         return authenticationService.refreshToken(request);
+    }
+
+    @PostMapping("/forgot-password")
+    public void fotgotPassword(@RequestBody EmailSenderRequest request) throws MessagingException {
+        emailService.sendHtmlEmail(request);
+    }
+
+    @PutMapping("/update-password")
+    public ApiResponse updatePassword(@RequestBody @Valid UpdatePasswordRequest request){
+        return userService.updatePassword(request);
     }
 
 }

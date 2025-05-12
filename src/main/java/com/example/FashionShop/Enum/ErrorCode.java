@@ -55,7 +55,13 @@ public enum ErrorCode {
     MIN_ORDER_VALUE_INVALID(1039, "Giá trị đơn hàng tối thiểu phải >= 0", HttpStatus.BAD_REQUEST),
     DISCOUNT_AMOUNT_INVALID(1039, "Giá tiền discount phải >= 0", HttpStatus.BAD_REQUEST),
     QUANTITY_INVALID(1040, "Số lượng sản phẩm không hợp lệ", HttpStatus.BAD_REQUEST),
-
+    UN_ACTIVE_ACCOUNT(1041, "Tài khoản của bạn đã bị khóa", HttpStatus.BAD_REQUEST),
+    QUANITTY_INVALID(1042, "So luong san pham khong hop le", HttpStatus.BAD_REQUEST),
+    ROLE_NOTFOUND(1043, "Role không hợp lệ!", HttpStatus.BAD_REQUEST),
+    WALLET_NOT_ENOUGH(1044, "Tài khoản của bạn không đủ!", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_EMPTY(1045,"Role không được để trống!", HttpStatus.BAD_REQUEST),
+    ACTIVE_CATEGORY_FAIL(1046,"Kích hoạt danh mục thất bại!", HttpStatus.BAD_REQUEST),
+    DELETE_CATEGORY_FAIL(1046,"Xóa danh mục thất bại!", HttpStatus.BAD_REQUEST),
     ;
 
     private int code;

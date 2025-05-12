@@ -24,7 +24,8 @@ public class Category {
     Integer idCategory;
 
     String name;
-
+    @Builder.Default
+    boolean deleted = false;
     @JsonIgnore
     @OneToMany(mappedBy = "category")
     @OnDelete(action = OnDeleteAction.CASCADE)

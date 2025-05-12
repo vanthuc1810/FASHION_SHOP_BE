@@ -13,6 +13,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -33,6 +35,10 @@ public class ProductController {
     public ApiResponse getProductById(@PathVariable("idProduct") Integer idProduct) {
         return productService.getProductById(idProduct);
     }
+    @PostMapping("/recomment")
+    public PageableResponse getRecommentProduct(@RequestBody @Valid FilterProductRequest request, Pageable pageable) {
+        return productService.getRecommentProduct(request, pageable);
+    }
 
     @GetMapping("/searchProducts")
     public PageableResponse searchProducts(@RequestParam String query, Pageable pageable) {
@@ -49,10 +55,9 @@ public class ProductController {
         return productService.createProduct(request);
     }
 
-    @PutMapping("/update/{idProduct}")
-    public ApiResponse updateProduct(
-            @PathVariable("idProduct") Integer idProduct, @RequestBody @Valid UpdateProductRequest request) {
-        return productService.updateProductById(idProduct, request);
+    @PutMapping("/update")
+    public ApiResponse updateProduct(@RequestBody @Valid UpdateProductRequest request) throws IOException {
+        return productService.updateProductById(request);
     }
 
     @PutMapping("/addColor")
@@ -69,5 +74,8 @@ public class ProductController {
     public ApiResponse deleteProductById(@RequestBody DeleteProductRequest request) {
          return productService.deleteProduct(request);
     }
-
+    @PutMapping("/active")
+    public ApiResponse deleteProductById(@RequestBody ActiveProductRequest request) {
+        return productService.activeProduct(request);
+    }
 }

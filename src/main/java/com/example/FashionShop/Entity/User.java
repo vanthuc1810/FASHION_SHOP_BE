@@ -30,7 +30,13 @@ public class User {
     String address;
     String role;
     float wallet;
-    boolean isAvaialbe;
+    boolean available;
+
+    @Builder.Default
+    boolean isVerifyed = false;
+
+    @Builder.Default
+    boolean deleted = false;
     @OneToMany(mappedBy = "user")
     @OnDelete(action = OnDeleteAction.CASCADE)
     List<Review> reviews = new ArrayList<>();

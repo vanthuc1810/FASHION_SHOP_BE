@@ -3,7 +3,12 @@ package com.example.FashionShop.Services;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.FashionShop.Dto.request.ActiveCategoryRequest;
+import com.example.FashionShop.Dto.request.DeleteCategoryRequest;
+import com.example.FashionShop.Entity.Product;
 import com.example.FashionShop.IServices.ICategoryService;
+import com.example.FashionShop.Repository.ProductRepository;
+import com.github.javafaker.Cat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +29,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CategoryService implements ICategoryService {
     CategoryRepository categoryRepository;
-
+    ProductRepository productRepository;
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse createCategory(CategoryCreationRequest request) {
@@ -58,10 +63,44 @@ public class CategoryService implements ICategoryService {
     }
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse deleteCategoryById(Integer idCategory) {
-        categoryRepository.deleteById(idCategory);
+    public ApiResponse deleteCategoryById(DeleteCategoryRequest request) {
+        List<Category> categoryList = categoryRepository.findAllById(request.getIdCategorys());
+        categoryList.forEach(category -> {
+            List<Product> productList = productRepository.findAllByCategory_IdCategory(category.getIdCategory());
+            List<Product> productUpdateList = productList.stream()
+                    .map(product -> {
+                        product.setDeleted(true);
+                        return product;
+                    })
+                    .toList();
+            productRepository.saveAll(productUpdateList);
+            category.setDeleted(true);
+            categoryRepository.save(category);
+        });
+
         return new ApiResponse().builder().message("Xóa danh mục thành công").build();
     }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse activeCategory(ActiveCategoryRequest request) {
+        List<Category> categoryList = categoryRepository.findAllById(request.getIdCategorys());
+        categoryList.forEach(category -> {
+            List<Product> productList = productRepository.findAllByCategory_IdCategory(category.getIdCategory());
+            List<Product> productUpdateList = productList.stream()
+                    .map(product -> {
+                        product.setDeleted(false);
+                        return product;
+                    })
+                    .toList();
+            productRepository.saveAll(productUpdateList);
+            category.setDeleted(false);
+            categoryRepository.save(category);
+        });
+
+        return new ApiResponse().builder().message("Kích hoạt danh mục thành công").build();
+    }
+
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")

@@ -49,7 +49,7 @@ public class ChatController {
         {
             List<User> listAdmin = userRepository.findAllByRole(Role.CHAT.name());
             for (User u : listAdmin) {
-                if (u.isAvaialbe()) {
+                if (u.isAvailable()) {
                     MessageResponse messageResponse = MessageResponse
                             .builder()
                             .reciveID(u.getIdUser().toString())
@@ -122,7 +122,7 @@ public class ChatController {
         var context = SecurityContextHolder.getContext();
         Integer idUser = Integer.parseInt(context.getAuthentication().getName());
         User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
-        user.setAvaialbe(false);
+        user.setAvailable(false);
         userRepository.save(user);
     }
 

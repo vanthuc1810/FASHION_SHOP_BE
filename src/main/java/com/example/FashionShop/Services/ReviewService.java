@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import com.example.FashionShop.Entity.*;
+import com.example.FashionShop.Repository.SalesOrderRepository;
 import com.example.FashionShop.Specification.ReviewSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,9 +20,6 @@ import com.example.FashionShop.Dto.request.ReviewCreationRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Dto.response.PageableResponse;
 import com.example.FashionShop.Dto.response.ReviewResponse;
-import com.example.FashionShop.Entity.Product;
-import com.example.FashionShop.Entity.Review;
-import com.example.FashionShop.Entity.User;
 import com.example.FashionShop.Enum.ErrorCode;
 import com.example.FashionShop.Exception.AppException;
 import com.example.FashionShop.IServices.IReviewService;
@@ -41,17 +40,18 @@ public class ReviewService implements IReviewService {
     UserRepository userRepository;
     ProductRepository productRepository;
     ReviewMapper reviewMapper;
-
+    SalesOrderRepository salesOrderRepository;
     @Override
     public ApiResponse<ReviewResponse> createReview(ReviewCreationRequest request) {
-//      Get Product
+
+//              Get Product
         Product product = productRepository.findById(request.getIdProduct())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOTFOUND));
 //      Get User
         Integer idUser = Integer.parseInt(SecurityContextHolder.getContext().getAuthentication().getName());
         User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
         Review review = reviewMapper.toReview(request, product, user);
-        reviewRepository.save(review);
+        review = reviewRepository.save(review);
         ReviewResponse reviewResponse = reviewMapper.toReviewResponse(review);
         return ApiResponse.<ReviewResponse>builder().results(reviewResponse).build();
     }

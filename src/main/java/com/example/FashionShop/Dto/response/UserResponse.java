@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class UserResponse {
-    String idUser;
+    Integer idUser;
     String name;
     String email;
     String phone;
@@ -18,5 +18,6 @@ public class UserResponse {
     String password;
     String role;
     float wallet;
-    boolean isAvaialbe;
+    boolean available;
+    boolean deleted;
 }

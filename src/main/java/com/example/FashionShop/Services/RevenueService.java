@@ -6,6 +6,8 @@ import com.example.FashionShop.Dto.response.Revenue.RevenueResponse;
 import com.example.FashionShop.Dto.response.Revenue.RevenueResponseItem;
 import com.example.FashionShop.Dto.response.SaleOrderResponse;
 import com.example.FashionShop.Entity.Card;
+import com.example.FashionShop.Entity.CardItem;
+import com.example.FashionShop.Entity.SalesOrder;
 import com.example.FashionShop.Enum.Day;
 import com.example.FashionShop.Enum.ErrorCode;
 import com.example.FashionShop.Enum.SalesOrderStatus;
@@ -25,9 +27,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -235,18 +239,27 @@ public class RevenueService implements IRevenueService {
                            Integer idUser,
                            String time) throws java.io.IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
+            if(time == null)
+            {
+                time = Day.DAY.name();
+            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             Sheet sheet = workbook.createSheet("Sales Orders");
             Row headerRow = sheet.createRow(0);
             // Create Header
             List<String> header = new ArrayList<>();
             header.add("STT");
             header.add("ID_SALE_ORDER");
+            header.add("ID_CATEGORY");
+            header.add("ID_PRODUCT");
             header.add("ID_USER");
             header.add("STATUS");
             header.add("PAYMENT_METHOD");
             header.add("AMOUNT");
             header.add("UNIT");
+            header.add("TIME_CREATED");
             header.add("TIME_FINISH");
+            header.add("QUANTITY");
             // In Header
             for(int i = 0; i < header.size(); i ++)
             {
@@ -255,50 +268,64 @@ public class RevenueService implements IRevenueService {
             }
             // In Du Lieu
             RevenueResponse revenueResponse = report(start, end, name, idCategory, status, idUser, time);
-            long totalOrder = revenueResponse.getTotalOrder();
             float totalPrice = revenueResponse.getTotalPrice();
             List<SaleOrderResponse> listSaleOrderResponse = revenueResponse.getOrders();
 
             int index = 1;
             for (SaleOrderResponse saleOrderResponse : listSaleOrderResponse) {
-                Row row = sheet.createRow(index);
+                Card card = cardRepository.findById(saleOrderResponse.getIdCard()).orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));
+                List<CardItem> cardItemList = card.getCardItems();
+                for (CardItem cardItem : cardItemList )
+                {
+                    Row row = sheet.createRow(index);
+                    // Ghi từng cột tương ứng với header
+                    for (int i = 0; i < header.size(); i++) {
+                        Cell cell = row.createCell(i);
 
-                // Ghi từng cột tương ứng với header
-                for (int i = 0; i < header.size(); i++) {
-                    Cell cell = row.createCell(i);
-
-                    switch (header.get(i)) {
-                        case "STT":
-                            cell.setCellValue(index); // Ghi số thứ tự
-                            break;
-                        case "ID_SALE_ORDER":
-                            cell.setCellValue(saleOrderResponse.getIdSalesOrder());
-                            break;
-                        case "ID_USER":
-                            cell.setCellValue(saleOrderResponse.getIdUser());
-                            break;
-                        case "STATUS":
-                            cell.setCellValue(saleOrderResponse.getStatus());
-                            break;
-                        case "PAYMENT_METHOD":
-                            cell.setCellValue(saleOrderResponse.getPaymentMethod());
-                            break;
-                        case "AMOUNT":
-                            Card card = cardRepository.findById(saleOrderResponse.getIdCard())
-                                    .orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));
-                            cell.setCellValue(card.getTotalPrice());
-                            break;
-                        case "UNIT":
-                            cell.setCellValue("VND");
-                            break;
-                        case "TIME_FINISH":
-                            cell.setCellValue(saleOrderResponse.getTimeFinished().toString());
-                            break;
-                        default:
-                            cell.setCellValue(""); // Giá trị mặc định nếu không khớp header
+                        switch (header.get(i)) {
+                            case "STT":
+                                cell.setCellValue(index); // Ghi số thứ tự
+                                break;
+                            case "ID_SALE_ORDER":
+                                cell.setCellValue(saleOrderResponse.getIdSalesOrder());
+                                break;
+                            case "ID_USER":
+                                cell.setCellValue(saleOrderResponse.getIdUser());
+                                break;
+                            case "ID_CATEGORY":
+                                cell.setCellValue(cardItem.getProduct().getCategory().getIdCategory());
+                                break;
+                            case "STATUS":
+                                cell.setCellValue(saleOrderResponse.getStatus());
+                                break;
+                            case "PAYMENT_METHOD":
+                                cell.setCellValue(saleOrderResponse.getPaymentMethod());
+                                break;
+                            case "AMOUNT":
+                                cell.setCellValue(card.getTotalPrice());
+                                break;
+                            case "ID_PRODUCT":
+                                cell.setCellValue(cardItem.getProduct().getIdProduct());
+                                break;
+                            case "QUANTITY":
+                                cell.setCellValue(cardItem.getQuantity());
+                                break;
+                            case "UNIT":
+                                cell.setCellValue("VND");
+                                break;
+                            case "TIME_CREATED":
+                                cell.setCellValue(saleOrderResponse.getTimeCreated().format(formatter));
+                                break;
+                            case "TIME_FINISH":
+                                LocalDateTime finishTime = saleOrderResponse.getTimeFinished();
+                                cell.setCellValue(finishTime != null ? finishTime.format(formatter) : "");
+                                break;
+                            default:
+                                cell.setCellValue(""); // Giá trị mặc định nếu không khớp header
+                        }
                     }
+                    index++;
                 }
-                index++;
             }
 
             // In total Amount
@@ -314,11 +341,10 @@ public class RevenueService implements IRevenueService {
 
             try (OutputStream outputStream = response.getOutputStream()) {
                 workbook.write(outputStream);
-            } catch (java.io.IOException e) {
-                throw new RuntimeException(e);
+                outputStream.flush();  // Đảm bảo dữ liệu được gửi đến client
+            } catch (IOException e) {
+                throw new RuntimeException("Error while exporting the file: " + e.getMessage(), e);
             }
-
-            response.getOutputStream().flush();
         }
     }
 }

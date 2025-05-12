@@ -41,11 +41,13 @@ public interface ProductMapper {
         @Mapping(source = "request.discount", target = "product.discount")
         @Mapping(source = "request.price", target = "product.price")
         @Mapping(source = "request.unitStock", target = "product.unitStock")
-        @Mapping(target = "product.category", expression = "java(getCategory(request.getIdCategory()))")
-        public Product toUpdateProduct(@MappingTarget Product product, @Valid UpdateProductRequest request);
+        @Mapping(target = "images", ignore = true) // bỏ qua thuộc tính imageUrl
 
+        public Product toUpdateProduct(@MappingTarget Product product, @Valid UpdateProductRequest request);
         @Mapping(target = "colors", expression = "java(getColorNames(product))")
         @Mapping(target = "sizes", expression = "java(getSizeNames(product))")
+        @Mapping(target = "idCategory", expression = "java(product.getCategory().getIdCategory())")
+
         public ProductResponse toProductResponse(Product product);
 
         public default List<String> getColorNames(Product product) {

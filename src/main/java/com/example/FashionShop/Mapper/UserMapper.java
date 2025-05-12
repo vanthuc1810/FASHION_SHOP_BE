@@ -22,6 +22,7 @@ public interface UserMapper {
     default <T> T updateFieldIfNotNull(T newValue, T oldValue) {
         return (newValue == "" || newValue == null) ? oldValue : newValue;
     }
-
+    @Mapping(target = "idUser", expression = "java(user.getIdUser())")
+    @Mapping(target = "available", expression = "java(user.isAvailable())")
     public UserResponse toUserResponse(User user);
 }

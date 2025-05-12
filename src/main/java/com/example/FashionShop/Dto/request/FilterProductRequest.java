@@ -20,6 +20,7 @@ public class FilterProductRequest {
     List<String> colors = new ArrayList<>();
     List<Integer> idCategorys = new ArrayList<>();
     List<String> manufacturers = new ArrayList<>();
-    List<Long> prices = Arrays.asList((long)0, (long)999999999);
-    boolean isDeleted = false;
+    List<Double> prices = new ArrayList<>(Arrays.asList(0.0, 1000000.0));
+    List<Boolean> isDeleted = new ArrayList<>(List.of(true, false));
+
 }

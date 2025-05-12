@@ -1,12 +1,12 @@
 package com.example.FashionShop.Controller;
 
-import com.example.FashionShop.Dto.request.TopUpWalletRequest;
+import com.example.FashionShop.Dto.request.*;
+import com.example.FashionShop.Dto.response.PageableResponse;
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.FashionShop.Dto.request.UpdateUserRequest;
-import com.example.FashionShop.Dto.request.UserCreationRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Services.UserService;
 
@@ -23,8 +23,8 @@ public class UserController {
     UserService userService;
 
     @GetMapping("/getUsers")
-    public ApiResponse getUsers() {
-        return userService.getUsers();
+    public PageableResponse getUsers(Pageable pageable) {
+        return userService.getUsers(pageable);
     }
 
     @GetMapping("/getUser/{idUser}")
@@ -32,9 +32,19 @@ public class UserController {
         return userService.getUserById(idUser);
     }
 
+    @GetMapping("/roles")
+    public ApiResponse getRoles() {
+        return userService.getRoles();
+    }
     @GetMapping("/getInfor")
     public ApiResponse getMyInfor() {
         return userService.getInfor();
+    }
+
+    @PostMapping("/filter")
+    public PageableResponse filterUser(@RequestParam String query, @RequestBody FilterUserRequest request, Pageable pageable)
+    {
+        return userService.filterUser(query, request, pageable);
     }
 
     @PostMapping("/create")
@@ -47,6 +57,11 @@ public class UserController {
         return userService.updateUser(request);
     }
 
+    @PutMapping("/updateRole")
+    public ApiResponse updateRole(@RequestBody @Valid UpdateRoleRequest request) {
+        return userService.updateRole(request);
+    }
+
     @PutMapping("/topUpWallet")
     public CheckoutResponseData topUpWallet(@RequestBody @Valid TopUpWalletRequest request) throws Exception {
         return userService.topUpWallet(request);
@@ -55,5 +70,15 @@ public class UserController {
     @PutMapping("/setAvaiable")
     public void setAvaiable() throws Exception {
         userService.setAvaiable();
+    }
+
+    @PutMapping("/delete")
+    public ApiResponse delete(@RequestBody DeleteUserRequest request) throws Exception {
+        return userService.delete(request);
+    }
+
+    @PutMapping("/active")
+    public ApiResponse delete(@RequestBody ActiveUserRequest request) throws Exception {
+        return userService.active(request);
     }
 }

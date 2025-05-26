@@ -13,7 +13,7 @@ public class ApiResponse<T> {
     int code = 1000;
 
     @Builder.Default
-    String message = "Success";
+    String message = "Thao tác thành công!!";
 
     T results;
 }

@@ -3,6 +3,7 @@ package com.example.FashionShop.Controller;
 import com.example.FashionShop.Dto.request.VoucherCreationRequest;
 import com.example.FashionShop.Dto.request.VoucherUpdateRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
+import com.example.FashionShop.IServices.IVoucherService;
 import com.example.FashionShop.Services.VoucherService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/voucher")
 public class VoucherController {
-    VoucherService voucherService;
+    IVoucherService voucherService;
     @PostMapping("/create")
     public ApiResponse createVoucher(@RequestBody @Valid VoucherCreationRequest request){
         return voucherService.create(request);

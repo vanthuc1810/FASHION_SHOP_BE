@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.example.FashionShop.Configuration.PageUtil;
-import com.example.FashionShop.Dto.request.CancleSaleOrdersRequest;
-import com.example.FashionShop.Dto.request.CompleteSaleOrdersRequest;
-import com.example.FashionShop.Dto.request.FilterOrderRequest;
+import com.example.FashionShop.Dto.request.*;
 import com.example.FashionShop.Dto.response.PageableResponse;
+import com.example.FashionShop.Entity.*;
 import com.example.FashionShop.IServices.ISalesOrderService;
 import com.example.FashionShop.Mapper.SaleOrderMapper;
+import com.example.FashionShop.Repository.*;
 import com.example.FashionShop.Specification.SaleOrderSpecification;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -26,21 +26,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.example.FashionShop.Dto.request.SalesOrderCreationRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Dto.response.SaleOrderResponse;
-import com.example.FashionShop.Entity.Card;
-import com.example.FashionShop.Entity.SalesOrder;
-import com.example.FashionShop.Entity.ShippingAddress;
-import com.example.FashionShop.Entity.User;
 import com.example.FashionShop.Enum.ErrorCode;
 import com.example.FashionShop.Enum.PaymentMethod;
 import com.example.FashionShop.Enum.SalesOrderStatus;
 import com.example.FashionShop.Exception.AppException;
-import com.example.FashionShop.Repository.CardRepository;
-import com.example.FashionShop.Repository.SalesOrderRepository;
-import com.example.FashionShop.Repository.ShippingAddressRepository;
-import com.example.FashionShop.Repository.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +46,7 @@ public class SalesOrderService implements ISalesOrderService {
     ShippingAddressRepository shippingAddressRepository;
     UserRepository userRepository;
     SaleOrderMapper saleOrderMapper;
+    ProductRepository productRepository;
 
     @Override
     public ApiResponse<SaleOrderResponse> createSalesOrder(SalesOrderCreationRequest request) {
@@ -89,6 +81,20 @@ public class SalesOrderService implements ISalesOrderService {
                 salesOrderRepository.save(salesOrder);
                 throw new AppException(ErrorCode.WALLET_NOT_ENOUGH);
             }
+            // check so luong
+            List<CardItem> cardItemList = salesOrder.getCard().getCardItems();
+            List<Product> productList = new ArrayList<>();
+            for(CardItem cardItem : cardItemList){
+                Product product = cardItem.getProduct();
+                int quantity = cardItem.getQuantity();
+                int productQuantity = product.getQuantity();
+                if(productQuantity < quantity){
+                    throw new AppException(ErrorCode.QUANTITY_INVALID);
+                }
+                product.setQuantity(productQuantity - quantity);
+                productList.add(product);
+            }
+            productRepository.saveAll(productList);
             salesOrder.setStatus(SalesOrderStatus.IN_PROGRESS.name());
             user.setWallet(user.getWallet() - salesOrder.getCard().getTotalPrice());
             userRepository.save(user);
@@ -210,6 +216,50 @@ public class SalesOrderService implements ISalesOrderService {
                 .results(saleOrderResponseList)
                 .build();
     }
+
+    @Override
+    public ApiResponse inProgressSaleOrderList(InProgressOrdersRequest request) {
+        List<SalesOrder> salesOrderList = salesOrderRepository.findAllById(request.getIdOrders());
+        for (SalesOrder salesOrder : salesOrderList) {
+            if (salesOrder.getPaymentMethod().equals(PaymentMethod.CASH.getName()) &&
+                    salesOrder.getStatus().equals(SalesOrderStatus.CREATED.name())) {
+
+                List<CardItem> cardItemList = salesOrder.getCard().getCardItems();
+                List<Product> productList = new ArrayList<>();
+                boolean hasInsufficientStock = false;
+
+                for (CardItem cardItem : cardItemList) {
+                    Product product = cardItem.getProduct();
+                    int requireQuantity = cardItem.getQuantity();
+                    int productQuantity = product.getQuantity();
+
+                    if (productQuantity < requireQuantity) {
+                        hasInsufficientStock = true;
+                        break; // Ra khỏi vòng lặp cardItem
+                    }
+                    product.setQuantity(productQuantity - requireQuantity);
+                    productList.add(product);
+                }
+
+                if (hasInsufficientStock) {
+                    continue; // Bỏ qua đơn hàng này, xử lý đơn tiếp theo
+                }
+
+                productRepository.saveAll(productList);
+
+                // Nếu đủ hàng thì cập nhật trạng thái
+                salesOrder.setStatus(SalesOrderStatus.IN_PROGRESS.name());
+            }
+        }
+        List<SaleOrderResponse> saleOrderResponseList = salesOrderList.stream().map(saleOrderMapper::toSaleOrderResponse).collect(Collectors.toList());
+        salesOrderRepository.saveAll(salesOrderList);
+        return ApiResponse
+                .builder()
+                .results(saleOrderResponseList)
+                .build();
+    }
+
+
 
     @PostAuthorize("returnObject.idUser.toString() == authentication.name")
     @Override
@@ -379,4 +429,6 @@ public class SalesOrderService implements ISalesOrderService {
                 .number(pageOrigin.getNumber())
                 .build();
     }
+
+
 }

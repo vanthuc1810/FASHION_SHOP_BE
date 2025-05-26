@@ -1,6 +1,7 @@
 package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.response.ApiResponse;
+import com.example.FashionShop.IServices.ICardItemService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +18,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/cardItem")
 public class CardItemController {
-    CardItemService cardItemService;
+    ICardItemService cardItemService;
 
     @GetMapping("/{idCardItem}")
     public ApiResponse getCardItemById(@PathVariable("idCardItem") Integer idCardItem)

@@ -3,10 +3,13 @@ package com.example.FashionShop.Services;
 import java.io.IOException;
 import java.text.Normalizer;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.example.FashionShop.Configuration.PageUtil;
 import com.example.FashionShop.Dto.response.ProductResponse;
 import com.example.FashionShop.Dto.response.RecommentResponse;
 import com.example.FashionShop.Entity.*;
@@ -454,59 +457,45 @@ public class ProductService implements IProductService{
         String url = "http://127.0.0.1:5000/recommend";
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Integer idUser = Integer.valueOf(authentication.getName());
-        System.out.println(idUser);
         SalesOrder salesOrder = salesOrderRepository.findLatestByUserId(idUser);
         RecommentRequest recommentRequest = new RecommentRequest();
         Card card = salesOrder.getCard();
-        List<Map<String, Integer>> purchases = new ArrayList<>();
+        List<Integer> idProducts = new ArrayList<>();
         for (CardItem cardItem : card.getCardItems())
         {
-            Map<String, Integer> item = new HashMap<>();
-            item.put("id_product", cardItem.getProduct().getIdProduct());
-            item.put("quantity", cardItem.getQuantity());
-            purchases.add(item);
+            idProducts.add(cardItem.getProduct().getIdProduct());
         }
-        recommentRequest.setUser_id(idUser);
-        recommentRequest.setNew_purchases(purchases);
+        recommentRequest.setIdProducts(idProducts);
+        recommentRequest.setIdSalesOrder(salesOrder.getIdSalesOrder());
+
         ResponseEntity<RecommentResponse> response = restTemplate.postForEntity(url, recommentRequest, RecommentResponse.class);
         RecommentResponse recommentResponse = response.getBody();
-        List<Integer> idProducts = recommentResponse.getSuggested_products();
+        List<Integer> idProductsResponse = recommentResponse.getSuggested_products();
 
-        // page able
-        double minPrice = request.getPrices().get(0);
-        double maxPrice = request.getPrices().get(1);
-        List<String> manufacturers = request.getManufacturers();
-        List<Integer> idCategorys = request.getIdCategorys();
-        List<String> colors = request.getColors();
-        List<String> sizes = request.getSizes();
-        List<Boolean> isDeleted = request.getIsDeleted();
-        // filter Manufacturer - Price - Colors - Size - Category
-        Specification<Product> spec = Specification
-                .where(ProductSpecification.hasManufacturer(manufacturers))
-                .and(ProductSpecification.hasColors(colors))
-                .and(ProductSpecification.hasSizes(sizes))
-                .and(ProductSpecification.hasPriceInRange(minPrice,maxPrice))
-                .and(ProductSpecification.hasIdCategory(idCategorys))
-                .and(ProductSpecification.hasDeleted(isDeleted))
-                .and(ProductSpecification.hasIdProduct(idProducts));
+        List<Product> productList = productRepository.findAllById(idProductsResponse);
 
+        Map<Integer, Product> productMap = productList.stream()
+                .collect(Collectors.toMap(Product::getIdProduct, Function.identity()));
 
-        Page<Product> pageOrigin = productRepository.findAll(spec, pageable);
+        List<Product> productList1 = idProductsResponse.stream()
+                .map(productMap::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-        List<Product> productList = pageOrigin.getContent();
-        List<ProductResponse> productResponseList = new ArrayList<>();
-        for(Product product : productList)
-        {
-            ProductResponse productResponse = productMapper.toProductResponse(product);
-            productResponseList.add(productResponse);
-        }
+        List<Product> productList2 = new ArrayList<>();
+        productList1.stream()
+                .filter(product -> !product.isDeleted())  // Lọc các sản phẩm không bị xóa
+                .forEach(productList2::add);  // Thêm vào productList2
+        Page<Product> page = PageUtil.toPage(productList2, pageable);
+
+        List<ProductResponse> productResponseList = page.getContent().stream().map(productMapper::toProductResponse).toList();
         return PageableResponse
                 .builder()
                 .results(productResponseList)
-                .size(pageOrigin.getSize())
-                .totalElements(pageOrigin.getTotalElements())
-                .totalPages(pageOrigin.getTotalPages())
-                .number(pageOrigin.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .number(page.getNumber())
                 .build();
     }
 

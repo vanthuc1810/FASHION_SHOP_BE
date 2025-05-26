@@ -183,8 +183,6 @@ public class RevenueService implements IRevenueService {
                         int date = 1;
                         int month = 1;
                         int year = 0;
-                        date = saleOrderResponse.getTimeCreated().getDayOfMonth();
-                        month = saleOrderResponse.getTimeCreated().getMonthValue();
                         year = saleOrderResponse.getTimeCreated().getYear();
                         if(saleOrderResponse.getTimeFinished() != null)
                         {

@@ -1,10 +1,10 @@
 package com.example.FashionShop.Services;
 
 import com.example.FashionShop.Dto.request.EmailSenderRequest;
-import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Entity.User;
 import com.example.FashionShop.Enum.ErrorCode;
 import com.example.FashionShop.Exception.AppException;
+import com.example.FashionShop.IServices.IEmailService;
 import com.example.FashionShop.Repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class EmailService {
+public class EmailService implements IEmailService {
     JavaMailSender mailSender;
     UserRepository userRepository;
 
@@ -37,6 +36,7 @@ public class EmailService {
     @Value("${jwt.secret}")
     protected String SIGNER_KEY;
 
+    @Override
     public void sendHtmlEmail(EmailSenderRequest request) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

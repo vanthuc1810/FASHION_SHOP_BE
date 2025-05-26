@@ -1,6 +1,7 @@
 package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.response.Revenue.RevenueResponse;
+import com.example.FashionShop.IServices.IRevenueService;
 import com.example.FashionShop.Services.RevenueService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/revenue")
 public class RevenueController {
-    RevenueService revenueService;
+    IRevenueService revenueService;
 
     @GetMapping("/report")
     public RevenueResponse revenueByTime(

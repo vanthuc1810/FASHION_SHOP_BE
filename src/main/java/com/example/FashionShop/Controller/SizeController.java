@@ -1,5 +1,6 @@
 package com.example.FashionShop.Controller;
 
+import com.example.FashionShop.IServices.ISizeService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/size")
 public class SizeController {
-    SizeService sizeService;
+    ISizeService sizeService;
 
     @GetMapping()
     public ApiResponse getAllSize() {

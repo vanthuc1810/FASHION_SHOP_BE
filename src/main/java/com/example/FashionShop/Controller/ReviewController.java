@@ -1,6 +1,7 @@
 package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.response.ReviewResponse;
+import com.example.FashionShop.IServices.IReviewService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/review")
 public class ReviewController {
-    ReviewService reviewService;
+    IReviewService reviewService;
 
     @PostMapping("/create")
     public ApiResponse<ReviewResponse> createReview(@RequestBody @Valid ReviewCreationRequest request) {

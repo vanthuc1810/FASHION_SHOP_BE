@@ -8,6 +8,9 @@ import com.example.FashionShop.Dto.request.*;
 import com.example.FashionShop.Entity.User;
 import com.example.FashionShop.Enum.ErrorCode;
 import com.example.FashionShop.Exception.AppException;
+import com.example.FashionShop.IServices.IAuthenticationService;
+import com.example.FashionShop.IServices.IEmailService;
+import com.example.FashionShop.IServices.IUserSerive;
 import com.example.FashionShop.Repository.UserRepository;
 import com.example.FashionShop.Services.EmailService;
 import com.example.FashionShop.Services.UserService;
@@ -31,9 +34,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class AuthenticationController {
-    AuthenticationService authenticationService;
-    EmailService emailService;
-    UserService userService;
+    IAuthenticationService authenticationService;
+    IEmailService emailService;
+    IUserSerive userService;
 
     @PostMapping("/login")
     public ApiResponse<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest authenticationRequest) throws AccessDeniedException {
@@ -43,9 +46,9 @@ public class AuthenticationController {
         return apiReponse;
     }
     @PostMapping("logout")
-    public void logout()
+    public void logout(@RequestBody LogoutRequest request)
     {
-        authenticationService.logout();
+        authenticationService.logout(request);
     }
 
     @PostMapping("/introspect")

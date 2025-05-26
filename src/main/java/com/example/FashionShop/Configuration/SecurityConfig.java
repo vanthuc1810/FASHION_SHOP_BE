@@ -2,6 +2,7 @@ package com.example.FashionShop.Configuration;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import lombok.experimental.NonFinal;
@@ -30,6 +32,8 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     protected String secretKey;
 
+    @Autowired
+    private TokenBlacklistFilter tokenBlacklistFilter;
     private final String[] publicEnpoints = {
         "/auth/login",
         "/auth/refresh",
@@ -38,12 +42,15 @@ public class SecurityConfig {
         "/review/**",
         "/product",
         "/product/recomment",
+        "/product/manufacturer",
         "/user/getUser/*",
         "/user/create",
         "/color",
+        "/product/filterProduct",
         "/size",
         "/category",
         "/manufacturer",
+        "/manufacturer/*",
         "/createPaymentLink",
         "/checkPaymentLink",
         "/recieveWebhook",
@@ -68,7 +75,8 @@ public class SecurityConfig {
 
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
                                 jwtConfigurer.decoder(jwtDecoder()).jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
+                .addFilterBefore(tokenBlacklistFilter, BearerTokenAuthenticationFilter.class);
 
         return httpSecurity.build();
     }

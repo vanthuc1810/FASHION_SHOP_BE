@@ -1,5 +1,6 @@
 package com.example.FashionShop.Controller;
 
+import com.example.FashionShop.IServices.IColorService;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.FashionShop.Dto.response.ApiResponse;
@@ -14,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/color")
 public class ColorController {
-    ColorService colorService;
+    IColorService colorService;
 
     @GetMapping()
     public ApiResponse getAllColor() {

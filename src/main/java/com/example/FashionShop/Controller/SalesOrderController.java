@@ -1,14 +1,12 @@
 package com.example.FashionShop.Controller;
 
-import com.example.FashionShop.Dto.request.CancleSaleOrdersRequest;
-import com.example.FashionShop.Dto.request.CompleteSaleOrdersRequest;
-import com.example.FashionShop.Dto.request.FilterOrderRequest;
+import com.example.FashionShop.Dto.request.*;
 import com.example.FashionShop.Dto.response.PageableResponse;
+import com.example.FashionShop.IServices.ISalesOrderService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.FashionShop.Dto.request.SalesOrderCreationRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Dto.response.SaleOrderResponse;
 import com.example.FashionShop.Services.SalesOrderService;
@@ -22,7 +20,7 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SalesOrderController {
-    SalesOrderService salesOrderService;
+    ISalesOrderService salesOrderService;
 
     @PostMapping("/create")
     public ApiResponse createSalesOrder(@RequestBody @Valid SalesOrderCreationRequest request) {
@@ -82,6 +80,12 @@ public class SalesOrderController {
     public ApiResponse cancleSaleOrderList(@RequestBody CancleSaleOrdersRequest request)
     {
         return salesOrderService.cancleSaleOrderList(request);
+    }
+
+    @PutMapping("/in-progress")
+    public ApiResponse inProgressSaleOrderList(@RequestBody InProgressOrdersRequest request)
+    {
+        return salesOrderService.inProgressSaleOrderList(request);
     }
 
     @PutMapping("/cancle/{idSalesOrder}")

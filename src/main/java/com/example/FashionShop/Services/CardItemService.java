@@ -3,6 +3,7 @@ package com.example.FashionShop.Services;
 import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Dto.response.CardItemResponse;
 import com.example.FashionShop.Dto.response.ProductResponse;
+import com.example.FashionShop.IServices.ICardItemService;
 import com.example.FashionShop.Mapper.CardItemMapper;
 import com.example.FashionShop.Mapper.ProductMapper;
 import org.springframework.stereotype.Service;
@@ -24,12 +25,14 @@ import lombok.experimental.FieldDefaults;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class CardItemService {
+public class CardItemService implements ICardItemService {
     CardItemRepository cardItemRepository;
     ProductRepository productRepository;
     CardRepository cardRepository;
     ProductMapper productMapper;
     CardItemMapper cardItemMapper;
+
+    @Override
     public CardItem createCardItem(CardItemCreationRequest request, Integer idCard) {
 
         Product product = productRepository
@@ -40,13 +43,12 @@ public class CardItemService {
             throw new AppException(ErrorCode.QUANTITY_INVALID);
         }
         Card card = cardRepository.findById(idCard).orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));
-        Integer newQuantity = product.getQuantity() - request.getQuantity();
-        product.setQuantity(newQuantity);
         CardItem cardItem = cardItemMapper.toCardItem(request, product, card);
         cardItemRepository.save(cardItem);
         productRepository.save(product);
         return cardItem;
     }
+    @Override
     public ApiResponse getCardItemById(Integer idCardItem)
     {
         CardItem cardItem = cardItemRepository.findById(idCardItem).orElseThrow(() -> new AppException(ErrorCode.CARD_NOTFOUND));

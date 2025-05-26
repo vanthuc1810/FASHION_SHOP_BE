@@ -59,6 +59,9 @@ public class ProductSpecification {
     public static Specification<Product> hasDeleted(List<Boolean> delete){
         return (root, query, criteriaBuilder) ->
         {
+            if(delete == null || delete.isEmpty()){
+                return criteriaBuilder.conjunction(); // Không thêm điều kiện
+            }
             Predicate hasDeleted = root.get("deleted").in(delete);
             return hasDeleted;
         };

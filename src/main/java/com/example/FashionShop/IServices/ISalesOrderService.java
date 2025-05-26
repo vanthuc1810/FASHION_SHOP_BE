@@ -1,9 +1,6 @@
 package com.example.FashionShop.IServices;
 
-import com.example.FashionShop.Dto.request.CancleSaleOrdersRequest;
-import com.example.FashionShop.Dto.request.CompleteSaleOrdersRequest;
-import com.example.FashionShop.Dto.request.FilterOrderRequest;
-import com.example.FashionShop.Dto.request.SalesOrderCreationRequest;
+import com.example.FashionShop.Dto.request.*;
 import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Dto.response.PageableResponse;
 import com.example.FashionShop.Dto.response.SaleOrderResponse;
@@ -46,4 +43,6 @@ public interface ISalesOrderService {
     List<SaleOrderResponse> getSaleOrdersByIdCategory(Integer idCategory);
 
     PageableResponse getSaleOrders (Pageable pageable, FilterOrderRequest request);
+
+    ApiResponse inProgressSaleOrderList(InProgressOrdersRequest request);
 }

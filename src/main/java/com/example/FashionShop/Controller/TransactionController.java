@@ -2,6 +2,7 @@ package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.response.ApiResponse;
 import com.example.FashionShop.Entity.Transaction;
+import com.example.FashionShop.IServices.ITransactionService;
 import com.example.FashionShop.Services.TransactionService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import vn.payos.type.Webhook;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/transaction")
 public class TransactionController {
-    TransactionService transactionService;
+    ITransactionService transactionService;
 
     @PostMapping("/walletWebhook")
     public ApiResponse topUpWalletWebhook(@RequestBody Webhook data) throws Exception {

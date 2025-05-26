@@ -4,9 +4,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-
 public class PageUtil {
 
     public static <T> Page<T> toPage(List<T> list, Pageable pageable) {

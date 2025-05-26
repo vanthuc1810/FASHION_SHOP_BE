@@ -2,6 +2,7 @@ package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.request.ActiveCategoryRequest;
 import com.example.FashionShop.Dto.request.DeleteCategoryRequest;
+import com.example.FashionShop.IServices.ICategoryService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @RequestMapping("/category")
 public class CategoryController {
-    CategoryService categoryService;
+    ICategoryService categoryService;
 
     @PostMapping("/create")
     public ApiResponse createCategory(@RequestBody @Valid CategoryCreationRequest request) {

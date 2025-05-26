@@ -1,13 +1,20 @@
 package com.example.FashionShop.Services;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.FashionShop.Dto.request.QRBank.PaymentLinkRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
+import com.example.FashionShop.Entity.CardItem;
+import com.example.FashionShop.Entity.Product;
 import com.example.FashionShop.Entity.SalesOrder;
+import com.example.FashionShop.Entity.User;
 import com.example.FashionShop.Enum.SalesOrderStatus;
 import com.example.FashionShop.IServices.IQRBankService;
+import com.example.FashionShop.Repository.ProductRepository;
 import com.example.FashionShop.Repository.SalesOrderRepository;
+import com.example.FashionShop.Repository.UserRepository;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,6 +49,8 @@ public class QRBankService implements IQRBankService {
     @Value("${urlFE}")
     private String urlFE;
 
+    UserRepository userRepository;
+    ProductRepository productRepository;
     @Override
     public CheckoutResponseData createPaymentLink(PaymentLinkRequest paymentLinkRequest) throws Exception {
 
@@ -50,6 +59,18 @@ public class QRBankService implements IQRBankService {
         SalesOrder salesOrder = salesOrderRepository
                 .findById(paymentLinkRequest.getIdSalesOrder())
                 .orElseThrow(() -> new AppException(ErrorCode.SALES_ORDER_NOTFOUND));
+
+        // check so luong san pham
+        for(CardItem cardItem : salesOrder.getCard().getCardItems()){
+            Product product = cardItem.getProduct();
+            int quantity = cardItem.getQuantity();
+            int quantityProduct = product.getQuantity();
+
+            if(quantityProduct < quantity){
+                throw new AppException(ErrorCode.QUANTITY_INVALID);
+            }
+        }
+
 
         double totalPrice = salesOrder.getCard().getTotalPrice();
 
@@ -61,8 +82,8 @@ public class QRBankService implements IQRBankService {
                 .orderCode(idOrder)
                 .amount((int) totalPrice)
                 .description("Thanh toan don hang")
-                .returnUrl(urlFE + "/success")
-                .cancelUrl(urlFE + "/cancle")
+                .returnUrl(urlFE)
+                .cancelUrl(urlFE)
                 .build();
         CheckoutResponseData checkoutResponseData = payOS.createPaymentLink(paymentData);
         payOS.confirmWebhook(urlServer+"/recieveWebhook");
@@ -85,6 +106,26 @@ public class QRBankService implements IQRBankService {
             {
                 salesOrder.setStatus(SalesOrderStatus.IN_PROGRESS.name());
                 salesOrder.setTimeFinished(LocalDateTime.now());
+                List<CardItem> cardItemList = salesOrder.getCard().getCardItems();
+                List<Product> productList = new ArrayList<>();
+                for(CardItem cardItem : cardItemList){
+                    Product product = cardItem.getProduct();
+                    int quantity = cardItem.getQuantity();
+                    int quantityProduct = product.getQuantity();
+
+                    if(quantityProduct < quantity){
+                        User user = salesOrder.getUser();
+                        float refund = salesOrder.getCard().getTotalPrice();
+                        user.setWallet(user.getWallet() + refund);
+                        userRepository.save(user);
+                        salesOrder.setStatus(SalesOrderStatus.PENDING_PAYMENT.name());
+                        salesOrderRepository.save(salesOrder);
+                        throw new AppException(ErrorCode.QUANTITY_INVALID);
+                    }
+                    product.setQuantity(quantityProduct - quantity);
+                    productList.add(product);
+                }
+                productRepository.saveAll(productList);
             }
             salesOrderRepository.save(salesOrder);
         }catch (Exception e) {

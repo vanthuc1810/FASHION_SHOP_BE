@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 public class CategoryUpdateRequest {
     @Size(min = 2, max = 20, message = "SIZE_CATEGORY_INVALID")
     @Pattern(
-            regexp = "^[A-Z][^\\d]+$",
+            regexp = "^[\\p{Lu}][^\\d]+$",
             message = "CATEGORY_INVALID"
     )
     String name;

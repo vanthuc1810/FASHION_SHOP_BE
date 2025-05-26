@@ -2,6 +2,7 @@ package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.request.QRBank.PaymentLinkRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
+import com.example.FashionShop.IServices.IQRBankService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ import vn.payos.type.Webhook;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class QRBankController {
-    QRBankService qrBankService;
+    IQRBankService qrBankService;
 
 
     @PostMapping("/recieveWebhook")

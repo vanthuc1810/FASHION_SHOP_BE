@@ -7,13 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-import java.util.Map;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RecommentRequest {
-    List<Integer> idProducts;
-    Integer idSalesOrder;
+public class InProgressOrdersRequest {
+    List<Integer> idOrders;
 }

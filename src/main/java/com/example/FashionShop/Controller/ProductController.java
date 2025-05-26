@@ -1,5 +1,6 @@
 package com.example.FashionShop.Controller;
 
+import com.example.FashionShop.IServices.IProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ import java.io.IOException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/product")
 public class ProductController {
-    ProductService productService;
+    IProductService productService;
 
     @GetMapping()
     public PageableResponse getAllProducts(Pageable pageable) {

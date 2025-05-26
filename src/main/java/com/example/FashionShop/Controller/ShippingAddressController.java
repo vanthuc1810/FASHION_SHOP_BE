@@ -1,5 +1,6 @@
 package com.example.FashionShop.Controller;
 
+import com.example.FashionShop.IServices.IShippingAddressService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/shipping-address")
 public class ShippingAddressController {
-    ShippingAddressService shippingAddressService;
+    IShippingAddressService shippingAddressService;
 
     @PostMapping("/create")
     public ApiResponse createShippingAddress(@RequestBody @Valid ShippingAddressCreationRequest request) {

@@ -24,10 +24,12 @@ public class UserCreationRequest {
     String name;
 
     @Email(message = "EMAIL_INVALID")
+    @NotBlank(message = "FIELD_NOTBLANK")
     String email;
 
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "PHONENUMER_INVALID")
     String phone;
+
     @NotBlank(message = "FIELD_NOTBLANK")
     @Size(min = 0, max = 100, message = "ADDRESS_INVALID")
     String address;

@@ -7,7 +7,10 @@ import java.util.Date;
 import java.util.Optional;
 
 import com.example.FashionShop.Dto.request.EmailSenderRequest;
+import com.example.FashionShop.Dto.request.LogoutRequest;
 import com.example.FashionShop.Dto.response.ApiResponse;
+import com.example.FashionShop.Entity.BlackListToken;
+import com.example.FashionShop.Repository.BlackListTokenRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -39,14 +42,19 @@ import lombok.experimental.NonFinal;
 public class AuthenticationService implements IAuthenticationService {
     UserRepository userRepository;
     EmailService emailService;
-
+    BlackListTokenRepository blackListTokenRepository;
     @NonFinal
     @Value("${jwt.secret}")
     protected String SIGNER_KEY;
 
-    public void logout() {
+    @Override
+    public void logout(LogoutRequest request) {
         // set black jwt
-
+        BlackListToken blackListToken = BlackListToken
+                .builder()
+                .token(request.getToken())
+                .build();
+        blackListTokenRepository.save(blackListToken);
         // set avalable user
         var context = SecurityContextHolder.getContext();
         Integer idUser = Integer.parseInt(context.getAuthentication().getName());
@@ -133,6 +141,9 @@ public class AuthenticationService implements IAuthenticationService {
 
         if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
+        if(blackListTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
         return signedJWT;
     }
 
@@ -163,9 +174,6 @@ public class AuthenticationService implements IAuthenticationService {
     @Override
     public ApiResponse forgotPassword(EmailSenderRequest request) {
         User user = userRepository.findByEmail(request.getTo()).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
-        if(user.isVerifyed()){
-
-        }
         return null;
     }
 }

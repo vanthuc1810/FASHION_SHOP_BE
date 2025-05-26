@@ -2,6 +2,7 @@ package com.example.FashionShop.Controller;
 
 import com.example.FashionShop.Dto.request.*;
 import com.example.FashionShop.Dto.response.PageableResponse;
+import com.example.FashionShop.IServices.IUserSerive;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -20,7 +21,7 @@ import vn.payos.type.CheckoutResponseData;
 @RequiredArgsConstructor
 @RequestMapping("/user")
 public class UserController {
-    UserService userService;
+    IUserSerive userService;
 
     @GetMapping("/getUsers")
     public PageableResponse getUsers(Pageable pageable) {

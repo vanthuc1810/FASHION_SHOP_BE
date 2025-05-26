@@ -31,10 +31,8 @@ public class User {
     String role;
     float wallet;
     boolean available;
-
     @Builder.Default
-    boolean isVerifyed = false;
-
+    boolean isVerifyed = true;
     @Builder.Default
     boolean deleted = false;
     @OneToMany(mappedBy = "user")

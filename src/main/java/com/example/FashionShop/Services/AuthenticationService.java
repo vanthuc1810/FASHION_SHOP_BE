@@ -71,7 +71,7 @@ public class AuthenticationService implements IAuthenticationService {
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword());
         if (!authenticated) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
         if(user.isDeleted())
         {

@@ -62,6 +62,8 @@ public enum ErrorCode {
     ROLE_NOT_EMPTY(1045,"Role không được để trống!", HttpStatus.BAD_REQUEST),
     ACTIVE_CATEGORY_FAIL(1046,"Kích hoạt danh mục thất bại!", HttpStatus.BAD_REQUEST),
     DELETE_CATEGORY_FAIL(1046,"Xóa danh mục thất bại!", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD(1047, "Mật khẩu không chính xác", HttpStatus.UNAUTHORIZED),
+
     ;
 
     private int code;

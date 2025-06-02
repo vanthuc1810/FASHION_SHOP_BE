@@ -17,6 +17,7 @@ public class UserResponse {
     String userName;
     String password;
     String role;
+    String image;
     float wallet;
     boolean available;
     boolean deleted;

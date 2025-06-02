@@ -29,6 +29,9 @@ public class User {
     String phone;
     String address;
     String role;
+    @Builder.Default
+    String image = "https://res.cloudinary.com/vanthuc/image/upload/v1747322832/avatar_xtmmvp.jpg";
+
     float wallet;
     boolean available;
     @Builder.Default

@@ -295,7 +295,7 @@ public class SalesOrderService implements ISalesOrderService {
                 salesOrder.setStatus(SalesOrderStatus.CANCLE.name());
                 salesOrder = salesOrderRepository.save(salesOrder);
                 float currentWallet = user.getWallet();
-                user.setWallet(currentWallet + salesOrder.getCard().getTotalPrice());
+//                user.setWallet(currentWallet + salesOrder.getCard().getTotalPrice());
             }
             if(salesOrder.getPaymentMethod().equals(PaymentMethod.CASH.getName()))
             {

@@ -15,6 +15,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import vn.payos.type.CheckoutResponseData;
 
+import java.io.IOException;
+
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 // MakeFinal = true vi @RequireArgsContructor se tu dong inject cac bean final
@@ -61,6 +63,11 @@ public class UserController {
     @PutMapping("/updateRole")
     public ApiResponse updateRole(@RequestBody @Valid UpdateRoleRequest request) {
         return userService.updateRole(request);
+    }
+
+    @PutMapping("/updateImage")
+    public ApiResponse updateImage(@RequestBody @Valid UpdateImageRequest request) throws IOException {
+        return userService.updateImage(request);
     }
 
     @PutMapping("/topUpWallet")

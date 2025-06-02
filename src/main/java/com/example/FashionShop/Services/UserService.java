@@ -1,9 +1,13 @@
 package com.example.FashionShop.Services;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.FashionShop.Dto.request.*;
 import com.example.FashionShop.Dto.response.PageableResponse;
 import com.example.FashionShop.Specification.UserSpecification;
@@ -51,6 +55,7 @@ public class UserService implements IUserSerive {
     PasswordEncoder passwordEncoder;
     TransactionService transactionService;
     TransactionRepository transactionRepository;
+    Cloudinary cloudinary;
 
     @NonFinal
     @Value("${urlServer}")
@@ -315,5 +320,34 @@ public class UserService implements IUserSerive {
                 .builder()
                 .results(userResponse)
                 .build();
+    }
+
+    @Override
+    public ApiResponse updateImage(UpdateImageRequest request) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer idUser = Integer.valueOf(authentication.getName());
+
+        User user = userRepository.findById(idUser).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+
+        if(isBase64Image(request.getImage()))
+        {
+            Map<String, Object> cloudResponse = uploadCloudinary(request.getImage());
+
+            String newImages = (String) cloudResponse.get("secure_url");
+
+            user.setImage(newImages);
+        }
+
+        userRepository.save(user);
+        return new ApiResponse();
+    }
+
+    public Map<String, Object> uploadCloudinary(String base64Image) throws IOException {
+        return cloudinary.uploader()
+                .upload(base64Image.getBytes(), ObjectUtils.emptyMap());
+    }
+
+    public static boolean isBase64Image(String image) {
+        return image != null && image.startsWith("data:image/");
     }
 }

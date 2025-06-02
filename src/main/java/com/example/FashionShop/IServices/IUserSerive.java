@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import vn.payos.type.CheckoutResponseData;
 
+import java.io.IOException;
+
 public interface IUserSerive {
     public PageableResponse getUsers(Pageable pageable);
 
@@ -34,4 +36,6 @@ public interface IUserSerive {
     ApiResponse active(ActiveUserRequest request);
 
     ApiResponse updatePassword(UpdatePasswordRequest request);
+
+    ApiResponse updateImage(UpdateImageRequest request) throws IOException;
 }
